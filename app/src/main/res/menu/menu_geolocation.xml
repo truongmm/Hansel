@@ -2,6 +2,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.codepath.hansel.activities.GeolocationActivity">
+
+    <item android:id="@+id/action_map" android:title="@string/action_map"
+        android:orderInCategory="1" app:showAsAction="always" android:icon="@drawable/ic_map" />
+
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" app:showAsAction="never" />
 </menu>
