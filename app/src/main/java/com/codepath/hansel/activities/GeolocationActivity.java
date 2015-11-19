@@ -1,5 +1,6 @@
 package com.codepath.hansel.activities;
 
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -52,6 +53,9 @@ public class GeolocationActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        }else if(id == R.id.action_map) {
+            Intent intent = new Intent(GeolocationActivity.this, MapActivity.class);
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);
