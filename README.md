@@ -1,6 +1,6 @@
 # Group Project - Hansel
 
-Inspired by the story <a href="https://en.wikipedia.org/wiki/Hansel_and_Gretel">Hansel and Gretel</a>, Hansel is an android app that allows users to automatically track user's gelocations over time and share with others.  It is most useful in a situation where internet connectivity is unstable and/or limited for one or more members in the group.
+Inspired by the story of <a href="https://en.wikipedia.org/wiki/Hansel_and_Gretel">Hansel and Gretel</a>, Hansel is an android app that allows users to automatically track user's gelocations over time and share with others.  It is most useful in a situation where internet connectivity is unstable and/or limited for one or more members in the group.
 
 ## General use cases
 - As a person who lost his/her friends at an outdoor concert event and can't reach them via phone calls or messages, I want to trace the locations where my friends were recently spotted by the app.  
