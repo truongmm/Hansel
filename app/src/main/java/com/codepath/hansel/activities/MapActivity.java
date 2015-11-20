@@ -12,6 +12,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.codepath.hansel.R;
+import com.codepath.hansel.models.GeoPoint;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -26,6 +27,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+
 public class MapActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
@@ -34,6 +37,7 @@ public class MapActivity extends AppCompatActivity implements
     private GoogleMap map;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
+    private ArrayList<GeoPoint> geoPoints;
     private long UPDATE_INTERVAL = 60000;  /* 60 secs */
     private long FASTEST_INTERVAL = 5000; /* 5 secs */
 
@@ -48,6 +52,8 @@ public class MapActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
+        setStubbedGeoPoints();
+
         mapFragment = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map));
         if (mapFragment != null) {
             mapFragment.getMapAsync(new OnMapReadyCallback() {
@@ -61,7 +67,13 @@ public class MapActivity extends AppCompatActivity implements
         }
 
     }
-
+    private void setStubbedGeoPoints() {
+        geoPoints = new ArrayList<>();
+        geoPoints.add(new GeoPoint("Ray", 34.041702, -118.258451, "7 mins ago"));
+        geoPoints.add(new GeoPoint("Ray", 34.041595, -118.260146, "5 mins ago"));
+        geoPoints.add(new GeoPoint("Ray", 34.041835, -118.262410, "4 mins ago"));
+        geoPoints.add(new GeoPoint("Ray", 34.042040, -118.263300, "2 mins ago"));
+    }
     protected void loadMap(GoogleMap googleMap) {
         map = googleMap;
         if (map != null) {
@@ -75,13 +87,17 @@ public class MapActivity extends AppCompatActivity implements
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this).build();
 
-            LatLng sydney = new LatLng(37.4252366, -122.13649);
-            map.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-            map.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+            loadMarkers();
 
             connectClient();
         } else {
             Toast.makeText(this, "Error - Map was null!!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void loadMarkers(){
+        for (GeoPoint geoPoint : geoPoints) {
+            map.addMarker(new MarkerOptions().position(geoPoint.getLatLng()).title(geoPoint.getTimestamp()));
         }
     }
 
