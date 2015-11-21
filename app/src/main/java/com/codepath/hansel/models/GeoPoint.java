@@ -1,25 +1,24 @@
 package com.codepath.hansel.models;
 
-import android.text.format.DateUtils;
-
-import java.text.SimpleDateFormat;
-import java.util.Locale;
+import com.google.android.gms.maps.model.LatLng;
 
 public class GeoPoint {
 
     private String name;
-    private long longitude;
-    private long latitude;
+    private double latitude;
+    private double longitude;
     private String timestamp;
+    private LatLng latLng;
 
     public GeoPoint() {
     }
 
-    public GeoPoint(String name, long longitude, long latitude, String timestamp) {
+    public GeoPoint(String name, double latitude, double longitude, String timestamp) {
         this.name = name;
-        this.longitude = longitude;
         this.latitude = latitude;
+        this.longitude = longitude;
         this.timestamp = timestamp;
+        this.latLng = new LatLng(latitude, longitude);
     }
 
     public String getName() {
@@ -27,13 +26,16 @@ public class GeoPoint {
     }
 
     public String getGeolocation() {
-        return longitude + ", " + latitude;
+        return latitude + ", " + longitude;
     }
 
     public String getTimestamp() {
         return timestamp;
     }
 
+    public LatLng getLatLng() {
+        return latLng;
+    }
 //    public String getRelativeTimeAgo(String rawJsonDate) {
 //        String twitterFormat = "EEE MMM dd HH:mm:ss ZZZZZ yyyy";
 //        SimpleDateFormat sf = new SimpleDateFormat(twitterFormat, Locale.ENGLISH);
