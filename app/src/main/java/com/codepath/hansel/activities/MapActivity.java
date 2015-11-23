@@ -13,7 +13,9 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.codepath.hansel.R;
-import com.codepath.hansel.models.GeoPoint;
+import com.codepath.hansel.models.Pebble;
+import com.codepath.hansel.models.User;
+import com.codepath.hansel.utils.DatabaseHelper;
 import com.directions.route.AbstractRouting;
 import com.directions.route.Route;
 import com.directions.route.Routing;
@@ -45,7 +47,8 @@ public class MapActivity extends AppCompatActivity implements
     private GoogleMap map;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
-    private ArrayList<GeoPoint> geoPoints;
+    private DatabaseHelper dbHelper;
+    private ArrayList<Pebble> pebbles;
     private ArrayList<LatLng> latLngs;
     private ArrayList<Polyline> polylines;
     private ProgressDialog progressDialog;
@@ -64,8 +67,9 @@ public class MapActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
         polylines = new ArrayList<>();
-
-        setStubbedGeoPoints();
+        dbHelper = DatabaseHelper.getInstance(this);
+//        stubData();
+        fetchData();
         setLatLngs();
 
         mapFragment = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map));
@@ -80,21 +84,27 @@ public class MapActivity extends AppCompatActivity implements
         } else {
             Toast.makeText(this, "Error - Map Fragment was null!!", Toast.LENGTH_SHORT).show();
         }
-
+//        dbHelper.deleteAllTables();
     }
-    private void setStubbedGeoPoints() {
-        geoPoints = new ArrayList<>();
-        geoPoints.add(new GeoPoint("Ray", 34.041702, -118.258451, "7 mins ago"));
-        geoPoints.add(new GeoPoint("Ray", 34.041595, -118.260146, "5 mins ago"));
-        geoPoints.add(new GeoPoint("Ray", 34.041835, -118.262410, "4 mins ago"));
-        geoPoints.add(new GeoPoint("Ray", 34.042902, -118.264142, "2 mins ago"));
-        geoPoints.add(new GeoPoint("Ray", 34.041888, -118.264480, "now"));
+    private void stubData() {
+        pebbles = new ArrayList<>();
+        long userId = dbHelper.addOrUpdateUser(new User("Ray", "Yamada"));
+        User user = dbHelper.getUser(userId);
+        dbHelper.addPebble(new Pebble(user, 34.041702, -118.258451));
+        dbHelper.addPebble(new Pebble(user, 34.041595, -118.260146));
+        dbHelper.addPebble(new Pebble(user, 34.041835, -118.262410));
+        dbHelper.addPebble(new Pebble(user, 34.042902, -118.264142));
+        dbHelper.addPebble(new Pebble(user, 34.041888, -118.264480));
+    }
+
+    private void fetchData(){
+        pebbles = dbHelper.getAllPebbles();
     }
 
     private void setLatLngs(){
         latLngs = new ArrayList<>();
-        for (GeoPoint geoPoint : geoPoints) {
-            latLngs.add(geoPoint.getLatLng());
+        for (Pebble pebble : pebbles) {
+            latLngs.add(pebble.getLatLng());
         }
     }
 
@@ -132,8 +142,8 @@ public class MapActivity extends AppCompatActivity implements
     }
 
     private void loadMarkers(){
-        for (GeoPoint geoPoint : geoPoints) {
-            map.addMarker(new MarkerOptions().position(geoPoint.getLatLng()).title(geoPoint.getTimestamp()));
+        for (Pebble pebble : pebbles) {
+            map.addMarker(new MarkerOptions().position(pebble.getLatLng()).title(pebble.getDate().toString()));
         }
     }
 
