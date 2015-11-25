@@ -14,7 +14,7 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:src="@mipmap/ic_geopoint"
+        android:src="@mipmap/ic_default_profile"
         android:paddingRight="10dp" />
 
     <TextView
@@ -31,7 +31,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Geopoint"
+        android:text="Latitude,Longitude"
         android:id="@+id/tvGeolocation"
         android:layout_below="@+id/tvName"
         android:layout_toRightOf="@+id/imageView"
@@ -41,7 +41,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Timestamp"
+        android:text="RelativeTime"
         android:id="@+id/tvTimestamp"
         android:layout_alignTop="@+id/tvName"
         android:layout_alignParentRight="true"

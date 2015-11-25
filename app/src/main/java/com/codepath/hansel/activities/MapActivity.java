@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
@@ -13,7 +14,9 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.codepath.hansel.R;
-import com.codepath.hansel.models.GeoPoint;
+import com.codepath.hansel.models.Pebble;
+import com.codepath.hansel.models.User;
+import com.codepath.hansel.utils.DatabaseHelper;
 import com.directions.route.AbstractRouting;
 import com.directions.route.Route;
 import com.directions.route.Routing;
@@ -35,6 +38,8 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MapActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
@@ -45,14 +50,15 @@ public class MapActivity extends AppCompatActivity implements
     private GoogleMap map;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
-    private ArrayList<GeoPoint> geoPoints;
-    private ArrayList<LatLng> latLngs;
+    private DatabaseHelper dbHelper;
+    private HashMap<User, ArrayList<Pebble>> usersPebblesMap;
+//    private ArrayList<Pebble> pebbles;
     private ArrayList<Polyline> polylines;
     private ProgressDialog progressDialog;
     private long UPDATE_INTERVAL = 60000;  /* 60 secs */
     private long FASTEST_INTERVAL = 5000; /* 5 secs */
-    private int[] colors = new int[]{R.color.accent_material_dark ,R.color.accent_material_light,R.color.highlighted_text_material_dark,R.color.highlighted_text_material_light,R.color.primary_dark_material_light};
-
+    private int[] colors = new int[]{R.color.route_blue ,R.color.route_orange,R.color.route_purple,R.color.route_red,R.color.route_teal, R.color.route_yellow, R.color.route_blue_grey};
+    private int routeIndex = 0;
     /*
      * Define a request code to send to Google Play services This code is
      * returned in Activity.onActivityResult
@@ -64,9 +70,10 @@ public class MapActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
         polylines = new ArrayList<>();
-
-        setStubbedGeoPoints();
-        setLatLngs();
+        usersPebblesMap = new HashMap<>();
+        dbHelper = DatabaseHelper.getInstance(this);
+        fetchData();
+//        setLatLngs();
 
         mapFragment = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map));
         if (mapFragment != null) {
@@ -74,40 +81,49 @@ public class MapActivity extends AppCompatActivity implements
                 @Override
                 public void onMapReady(GoogleMap map) {
                     loadMap(map);
-                    route();
+                    drawRoutes();
                 }
             });
         } else {
             Toast.makeText(this, "Error - Map Fragment was null!!", Toast.LENGTH_SHORT).show();
         }
-
-    }
-    private void setStubbedGeoPoints() {
-        geoPoints = new ArrayList<>();
-        geoPoints.add(new GeoPoint("Ray", 34.041702, -118.258451, "7 mins ago"));
-        geoPoints.add(new GeoPoint("Ray", 34.041595, -118.260146, "5 mins ago"));
-        geoPoints.add(new GeoPoint("Ray", 34.041835, -118.262410, "4 mins ago"));
-        geoPoints.add(new GeoPoint("Ray", 34.042902, -118.264142, "2 mins ago"));
-        geoPoints.add(new GeoPoint("Ray", 34.041888, -118.264480, "now"));
     }
 
-    private void setLatLngs(){
-        latLngs = new ArrayList<>();
-        for (GeoPoint geoPoint : geoPoints) {
-            latLngs.add(geoPoint.getLatLng());
+
+    private void fetchData(){
+        ArrayList<User> users = dbHelper.getAllUsers();
+        for(User user: users){
+             usersPebblesMap.put(user, dbHelper.getPebblesForUsers(new User[]{user}));
         }
     }
+//
+//    private void setLatLngs(){
+//        latLngs = new ArrayList<>();
+//        for (Pebble pebble : pebbles) {
+//            latLngs.add(pebble.getLatLng());
+//        }
+//    }
 
-    private void route(){
+    private void drawRoutes(){
         progressDialog = ProgressDialog.show(this, "Please wait.",
                 "Fetching route information.", true);
-        Routing routing = new Routing.Builder()
-                .travelMode(AbstractRouting.TravelMode.DRIVING)
-                .withListener(this)
-                .alternativeRoutes(true)
-                .waypoints(latLngs)
-                .build();
-        routing.execute();
+
+        for (Map.Entry<User, ArrayList<Pebble>> entry : usersPebblesMap.entrySet())
+        {
+            ArrayList<LatLng> latLngs = new ArrayList<>();
+            for(Pebble pebble : entry.getValue()){
+                latLngs.add(pebble.getLatLng());
+            }
+
+            Routing routing = new Routing.Builder()
+                    .travelMode(AbstractRouting.TravelMode.DRIVING)
+                    .withListener(this)
+                    .alternativeRoutes(false)
+                    .waypoints(latLngs)
+                    .build();
+            routing.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);;
+        }
+
     }
 
     protected void loadMap(GoogleMap googleMap) {
@@ -132,8 +148,10 @@ public class MapActivity extends AppCompatActivity implements
     }
 
     private void loadMarkers(){
-        for (GeoPoint geoPoint : geoPoints) {
-            map.addMarker(new MarkerOptions().position(geoPoint.getLatLng()).title(geoPoint.getTimestamp()));
+        for (Map.Entry<User, ArrayList<Pebble>> entry : usersPebblesMap.entrySet()) {
+            for(Pebble pebble : entry.getValue()){
+                map.addMarker(new MarkerOptions().position(pebble.getLatLng()).title(pebble.getUser().getFullName() + "\n" + pebble.getRelativeTimeAgo() + "\n" +pebble.getCoordinate()));
+            }
         }
     }
 
@@ -304,31 +322,26 @@ public class MapActivity extends AppCompatActivity implements
 
     @Override
     public void onRoutingSuccess(ArrayList<Route> route, int shortestRouteIndex) {
-        Log.d("testtesttest", "Routing was sucessful.");
         progressDialog.dismiss();
-        LatLng start = latLngs.get(0);
-        LatLng end = latLngs.get(latLngs.size() - 1);
-        CameraUpdate center = CameraUpdateFactory.newLatLng(start);
-        CameraUpdate zoom = CameraUpdateFactory.zoomTo(16);
+//        LatLng start = latLngs.get(0);
+//        LatLng end = latLngs.get(latLngs.size() - 1);
+//        CameraUpdate center = CameraUpdateFactory.newLatLng(start);
+//        CameraUpdate zoom = CameraUpdateFactory.zoomTo(16);
 
 //        map.moveCamera(center);
 
 
-        if(polylines.size()>0) {
-            for (Polyline poly : polylines) {
-                poly.remove();
-            }
-        }
+//        if(polylines.size()>0) {
+//            for (Polyline poly : polylines) {
+//                poly.remove();
+//            }
+//        }
 
         polylines = new ArrayList<>();
         //add route(s) to the map.
         for (int i = 0; i <route.size(); i++) {
-
-            //In case of more than 5 alternative routes
-            int colorIndex = i % colors.length;
-
             PolylineOptions polyOptions = new PolylineOptions();
-            polyOptions.color(getResources().getColor(colors[colorIndex]));
+            polyOptions.color(getResources().getColor(colors[routeIndex]));
             polyOptions.width(10 + i * 3);
             polyOptions.addAll(route.get(i).getPoints());
             Polyline polyline = map.addPolyline(polyOptions);
@@ -336,24 +349,22 @@ public class MapActivity extends AppCompatActivity implements
 
             Toast.makeText(getApplicationContext(),"Route "+ (i+1) +": distance - "+ route.get(i).getDistanceValue()+": duration - "+ route.get(i).getDurationValue(),Toast.LENGTH_SHORT).show();
         }
-
-        // Start marker
-        MarkerOptions options = new MarkerOptions();
-        options.position(start);
-//        options.icon(BitmapDescriptorFactory.fromResource(R.drawable.start_blue));
-        map.addMarker(options);
-
-        // End marker
-        options = new MarkerOptions();
-        options.position(end);
-//        options.icon(BitmapDescriptorFactory.fromResource(R.drawable.end_green));
-        map.addMarker(options);
+        routeIndex++;
+//        // Start marker
+//        MarkerOptions options = new MarkerOptions();
+//        options.position(start);
+////        options.icon(BitmapDescriptorFactory.fromResource(R.drawable.start_blue));
+//        map.addMarker(options);
+//
+//        // End marker
+//        options = new MarkerOptions();
+//        options.position(end);
+////        options.icon(BitmapDescriptorFactory.fromResource(R.drawable.end_green));
+//        map.addMarker(options);
     }
 
     @Override
-    public void onRoutingCancelled() {
-        Log.d("testtesttest", "Routing was cancelled.");
-    }
+    public void onRoutingCancelled() {}
 
     // Define a DialogFragment that displays the error dialog
     public static class ErrorDialogFragment extends DialogFragment {
