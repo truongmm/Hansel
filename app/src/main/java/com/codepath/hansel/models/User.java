@@ -42,6 +42,7 @@ public class User {
 
         return user;
     }
+    public String toString() { return String.valueOf(id); }
 
     public long getId(){
         return id;

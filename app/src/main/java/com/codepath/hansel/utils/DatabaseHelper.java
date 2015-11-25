@@ -5,12 +5,16 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.codepath.hansel.models.Pebble;
 import com.codepath.hansel.models.User;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 
 /**
  * Created by ryamada on 11/22/15.
@@ -105,12 +109,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public long addPebble(Pebble pebble) {
         SQLiteDatabase db = getWritableDatabase();
         long pebbleId = -1;
+        String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         db.beginTransaction();
         try {
             ContentValues values = new ContentValues();
             values.put(KEY_PEBBLE_USER_ID_FK, pebble.getUser().getId());
             values.put(KEY_PEBBLE_LATITUDE, pebble.getLatitude());
             values.put(KEY_PEBBLE_LONGITUDE, pebble.getLongitude());
+            values.put(KEY_PEBBLE_TIMESTAMP, dateTime);
+            values.put(KEY_PEBBLE_CREATED_AT, dateTime);
+            values.put(KEY_PEBBLE_UPDATED_AT, dateTime);
 
             pebbleId = db.insertOrThrow(TABLE_PEBBLES, null, values);
             db.setTransactionSuccessful();
@@ -122,7 +130,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return pebbleId;
     }
 
-    public User getUser(long id){
+    public User getUser(long id) {
         SQLiteDatabase db = getReadableDatabase();
         User user = null;
         Cursor cursor = db.query(TABLE_USERS, new String[]{"*"}, KEY_USER_ID + " = ?", new String[]{String.valueOf(id)}, null, null, null, "1");
@@ -140,21 +148,44 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return user;
     }
 
+    public ArrayList<User> getAllUsers() {
+        ArrayList<User> users = new ArrayList<>();
+
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(TABLE_USERS, new String[]{"*"}, null, null, null, null, null);
+        try {
+            if (cursor.moveToFirst()) {
+                do {
+                    users.add(User.fromDB(cursor));
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            Log.d(TAG, "Error while trying to get posts from database");
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+        }
+        return users;
+    }
+
     public long addOrUpdateUser(User user) {
         SQLiteDatabase db = getWritableDatabase();
         long userId = -1;
-
+        String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         db.beginTransaction();
         try {
             ContentValues values = new ContentValues();
             values.put(KEY_USER_FIRST_NAME, user.getFirstName());
             values.put(KEY_USER_LAST_NAME, user.getLastName());
+            values.put(KEY_PEBBLE_CREATED_AT, dateTime);
+            values.put(KEY_PEBBLE_UPDATED_AT, dateTime);
 
             int rows = db.update(TABLE_USERS, values, KEY_USER_ID + "= ?", new String[]{String.valueOf(user.getId())});
 
             if (rows == 1) {
                 userId = user.getId();
-            }else{
+            } else {
                 userId = db.insertOrThrow(TABLE_USERS, null, values);
             }
             db.setTransactionSuccessful();
@@ -167,15 +198,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public ArrayList<Pebble> getAllPebbles() {
+        return getPebbles(null, null);
+    }
 
+    public ArrayList<Pebble> getPebblesForUsers(User[] whiteList) {
+        return getPebbles(whiteList, null);
+    }
+
+    public ArrayList<Pebble> getPebblesWithoutUsers(User[] blackList) {
+        return getPebbles(null, blackList);
+    }
+
+    public ArrayList<Pebble> getPebbles(User[] whiteList, User[] blackList) {
         ArrayList<Pebble> pebbles = new ArrayList<>();
+        String query = "SELECT * FROM %s LEFT OUTER JOIN %s ON %s.%s = %s.%s WHERE 1 = 1";
+        ArrayList<Object> params = new ArrayList<>();
+        params.addAll(Arrays.asList(TABLE_PEBBLES, TABLE_USERS, TABLE_PEBBLES, KEY_PEBBLE_USER_ID_FK, TABLE_USERS, KEY_USER_ID));
 
-        String PEBBLES_SELECT_QUERY =
-                String.format("SELECT * FROM %s LEFT OUTER JOIN %s ON %s.%s = %s.%s",
-                        TABLE_PEBBLES,
-                        TABLE_USERS,
-                        TABLE_PEBBLES, KEY_PEBBLE_USER_ID_FK,
-                        TABLE_USERS, KEY_USER_ID);
+        if (whiteList != null) {
+            query += " AND %s.%s IN (%s)";
+            params.addAll(Arrays.asList(TABLE_USERS, KEY_USER_ID, TextUtils.join(",", whiteList)));
+        }
+
+        if (blackList != null) {
+            query += " AND NOT %s.%s IN (%s)";
+            params.addAll(Arrays.asList(TABLE_USERS, KEY_USER_ID, TextUtils.join(",", blackList)));
+        }
+
+        String PEBBLES_SELECT_QUERY = String.format(query, params.toArray());
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery(PEBBLES_SELECT_QUERY, null);
         try {
@@ -186,7 +236,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     pebble.setUser(user);
 
                     pebbles.add(pebble);
-                } while(cursor.moveToNext());
+                } while (cursor.moveToNext());
             }
         } catch (Exception e) {
             Log.d(TAG, "Error while trying to get pebbles from database");

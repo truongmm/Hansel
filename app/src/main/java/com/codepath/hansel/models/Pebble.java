@@ -3,6 +3,7 @@ package com.codepath.hansel.models;
 import android.database.Cursor;
 
 import com.codepath.hansel.utils.DatabaseHelper;
+import com.codepath.hansel.utils.TimeHelper;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.sql.Timestamp;
@@ -75,11 +76,17 @@ public class Pebble {
         return longitude;
     }
 
-    public LatLng getLatLng() {
-        return latLng;
+    public LatLng getLatLng() { return latLng; }
+
+    public String getCoordinate() {
+        return latitude + ", " + longitude;
     }
 
     public Date getDate() {
         return date;
+    }
+
+    public String getRelativeTimeAgo(){
+        return TimeHelper.getRelativeTimeAgo(date);
     }
 }
