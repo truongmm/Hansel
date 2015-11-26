@@ -21,6 +21,7 @@ public class YouLogFragment extends LogFragment {
     }
 
     public void loadPebbles() {
+        aPebbles.clear();
         aPebbles.addAll(dbHelper.getPebblesForUsers(new User[]{dbHelper.getUser(1)}));
     }
 }
