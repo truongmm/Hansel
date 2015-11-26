@@ -24,5 +24,4 @@ Inspired by the story of <a href="https://en.wikipedia.org/wiki/Hansel_and_Grete
 ![cam00889](https://cloud.githubusercontent.com/assets/1873465/11288506/7be098ac-8ed9-11e5-9ad6-207c267e8510.jpg)
 
 ## Video Walkthrough 
-![hansel](https://cloud.githubusercontent.com/assets/1873465/11315744/35e4f16c-8fac-11e5-8e2c-b422b132e12b.gif)
-
+![hansel](https://cloud.githubusercontent.com/assets/5839078/11415356/ad15d0ae-93b6-11e5-831a-87cc952b3a5c.gif)
