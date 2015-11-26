@@ -1,4 +1,4 @@
-package com.codepath.hansel.activities;
+package com.codepath.hansel.fragments;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -9,8 +9,11 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.codepath.hansel.R;
@@ -41,18 +44,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MapActivity extends AppCompatActivity implements
+public class MapFragment extends Fragment implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         RoutingListener,
         LocationListener {
+
     private SupportMapFragment mapFragment;
     private GoogleMap map;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private DatabaseHelper dbHelper;
     private HashMap<User, ArrayList<Pebble>> usersPebblesMap;
-//    private ArrayList<Pebble> pebbles;
+    // private ArrayList<Pebble> pebbles;
     private ArrayList<Polyline> polylines;
     private ProgressDialog progressDialog;
     private long UPDATE_INTERVAL = 60000;  /* 60 secs */
@@ -66,16 +70,20 @@ public class MapActivity extends AppCompatActivity implements
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_map);
         polylines = new ArrayList<>();
         usersPebblesMap = new HashMap<>();
-        dbHelper = DatabaseHelper.getInstance(this);
+        dbHelper = DatabaseHelper.getInstance(getContext());
         fetchData();
-//        setLatLngs();
+        // setLatLngs();
+    }
 
-        mapFragment = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map));
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.activity_map, container, false);
+        mapFragment = ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map));
         if (mapFragment != null) {
             mapFragment.getMapAsync(new OnMapReadyCallback() {
                 @Override
@@ -85,19 +93,19 @@ public class MapActivity extends AppCompatActivity implements
                 }
             });
         } else {
-            Toast.makeText(this, "Error - Map Fragment was null!!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Error - Map Fragment was null!!", Toast.LENGTH_SHORT).show();
         }
+        return view;
     }
-
 
     private void fetchData(){
         ArrayList<User> users = dbHelper.getAllUsers();
         for(User user: users){
-             usersPebblesMap.put(user, dbHelper.getPebblesForUsers(new User[]{user}));
+            usersPebblesMap.put(user, dbHelper.getPebblesForUsers(new User[]{user}));
         }
     }
-//
-//    private void setLatLngs(){
+
+//    private void setLatLngs() {
 //        latLngs = new ArrayList<>();
 //        for (Pebble pebble : pebbles) {
 //            latLngs.add(pebble.getLatLng());
@@ -105,7 +113,7 @@ public class MapActivity extends AppCompatActivity implements
 //    }
 
     private void drawRoutes(){
-        progressDialog = ProgressDialog.show(this, "Please wait.",
+        progressDialog = ProgressDialog.show(getActivity(), "Please wait.",
                 "Fetching route information.", true);
 
         for (Map.Entry<User, ArrayList<Pebble>> entry : usersPebblesMap.entrySet())
@@ -123,18 +131,17 @@ public class MapActivity extends AppCompatActivity implements
                     .build();
             routing.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);;
         }
-
     }
 
     protected void loadMap(GoogleMap googleMap) {
         map = googleMap;
         if (map != null) {
             // Map is ready
-            Toast.makeText(this, "Map Fragment was loaded properly!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Map Fragment was loaded properly!", Toast.LENGTH_SHORT).show();
             map.setMyLocationEnabled(true);
 
             // Now that map has loaded, let's get our location!
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
+            mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
                     .addApi(LocationServices.API)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this).build();
@@ -143,7 +150,7 @@ public class MapActivity extends AppCompatActivity implements
 
             connectClient();
         } else {
-            Toast.makeText(this, "Error - Map was null!!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Error - Map was null!!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -166,7 +173,7 @@ public class MapActivity extends AppCompatActivity implements
      * Called when the Activity becomes visible.
     */
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
         connectClient();
     }
@@ -175,7 +182,7 @@ public class MapActivity extends AppCompatActivity implements
      * Called when the Activity is no longer visible.
 	 */
     @Override
-    protected void onStop() {
+    public void onStop() {
         // Disconnecting the client invalidates it.
         if (mGoogleApiClient != null) {
             mGoogleApiClient.disconnect();
@@ -187,7 +194,7 @@ public class MapActivity extends AppCompatActivity implements
      * Handle results returned to the FragmentActivity by Google Play services
      */
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Decide what to do based on the original request code
         switch (requestCode) {
 
@@ -206,7 +213,7 @@ public class MapActivity extends AppCompatActivity implements
 
     private boolean isGooglePlayServicesAvailable() {
         // Check that Google Play services is available
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getActivity());
         // If Google Play services is available
         if (ConnectionResult.SUCCESS == resultCode) {
             // In debug mode, log the status
@@ -214,7 +221,7 @@ public class MapActivity extends AppCompatActivity implements
             return true;
         } else {
             // Get the error dialog from Google Play services
-            Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(resultCode, this,
+            Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(resultCode, getActivity(),
                     CONNECTION_FAILURE_RESOLUTION_REQUEST);
 
             // If Google Play services can provide an error dialog
@@ -222,7 +229,7 @@ public class MapActivity extends AppCompatActivity implements
                 // Create a new DialogFragment for the error dialog
                 ErrorDialogFragment errorFragment = new ErrorDialogFragment();
                 errorFragment.setDialog(errorDialog);
-                errorFragment.show(getSupportFragmentManager(), "Location Updates");
+                errorFragment.show(getActivity().getSupportFragmentManager(), "Location Updates");
             }
 
             return false;
@@ -239,13 +246,13 @@ public class MapActivity extends AppCompatActivity implements
         // Display the connection status
         Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (location != null) {
-            Toast.makeText(this, "GPS location was found!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "GPS location was found!", Toast.LENGTH_SHORT).show();
             LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
             map.animateCamera(cameraUpdate);
             startLocationUpdates();
         } else {
-            Toast.makeText(this, "Current location was null, enable GPS on emulator!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Current location was null, enable GPS on emulator!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -263,7 +270,7 @@ public class MapActivity extends AppCompatActivity implements
         String msg = "Updated Location: " +
                 Double.toString(location.getLatitude()) + "," +
                 Double.toString(location.getLongitude());
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
 
     }
 
@@ -274,9 +281,9 @@ public class MapActivity extends AppCompatActivity implements
     @Override
     public void onConnectionSuspended(int i) {
         if (i == CAUSE_SERVICE_DISCONNECTED) {
-            Toast.makeText(this, "Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
         } else if (i == CAUSE_NETWORK_LOST) {
-            Toast.makeText(this, "Network lost. Please re-connect.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Network lost. Please re-connect.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -293,7 +300,7 @@ public class MapActivity extends AppCompatActivity implements
         if (connectionResult.hasResolution()) {
             try {
                 // Start an Activity that tries to resolve the error
-                connectionResult.startResolutionForResult(this,
+                connectionResult.startResolutionForResult(getActivity(),
                         CONNECTION_FAILURE_RESOLUTION_REQUEST);
 				/*
 				 * Thrown if Google Play services canceled the original
@@ -304,7 +311,7 @@ public class MapActivity extends AppCompatActivity implements
                 e.printStackTrace();
             }
         } else {
-            Toast.makeText(getApplicationContext(),
+            Toast.makeText(getActivity().getApplicationContext(),
                     "Sorry. Location services not available to you", Toast.LENGTH_LONG).show();
         }
     }
@@ -312,7 +319,7 @@ public class MapActivity extends AppCompatActivity implements
     @Override
     public void onRoutingFailure() {
         progressDialog.dismiss();
-        Toast.makeText(this,"Something went wrong, Try again", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(),"Something went wrong, Try again", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -347,7 +354,7 @@ public class MapActivity extends AppCompatActivity implements
             Polyline polyline = map.addPolyline(polyOptions);
             polylines.add(polyline);
 
-            Toast.makeText(getApplicationContext(),"Route "+ (i+1) +": distance - "+ route.get(i).getDistanceValue()+": duration - "+ route.get(i).getDurationValue(),Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity().getApplicationContext(),"Route "+ (i+1) +": distance - "+ route.get(i).getDistanceValue()+": duration - "+ route.get(i).getDurationValue(),Toast.LENGTH_SHORT).show();
         }
         routeIndex++;
 //        // Start marker
@@ -389,5 +396,4 @@ public class MapActivity extends AppCompatActivity implements
             return mDialog;
         }
     }
-
 }
