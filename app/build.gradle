@@ -26,4 +26,5 @@ dependencies {
     compile 'com.google.android.gms:play-services-maps:8.1.0'
     compile 'com.google.android.gms:play-services-location:8.1.0'
     compile 'com.github.jd-alexander:library:1.0.7'
+    compile 'com.android.support:design:23.1.1'
 }
