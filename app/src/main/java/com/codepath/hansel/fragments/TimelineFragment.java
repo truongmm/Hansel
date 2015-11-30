@@ -11,11 +11,6 @@ import android.view.ViewGroup;
 
 import com.astuetz.PagerSlidingTabStrip;
 import com.codepath.hansel.R;
-import com.codepath.hansel.models.Pebble;
-import com.codepath.hansel.models.User;
-import com.codepath.hansel.utils.DatabaseHelper;
-
-import java.util.ArrayList;
 
 public class TimelineFragment extends Fragment {
     @Override
