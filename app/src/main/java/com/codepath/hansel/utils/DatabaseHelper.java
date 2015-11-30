@@ -16,9 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
-/**
- * Created by ryamada on 11/22/15.
- */
 public class DatabaseHelper extends SQLiteOpenHelper {
     // Database Info
     private static final String DATABASE_NAME = "hanselDatabase";
@@ -224,6 +221,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             query += " AND NOT %s.%s IN (%s)";
             params.addAll(Arrays.asList(TABLE_USERS, KEY_USER_ID, TextUtils.join(",", blackList)));
         }
+
+        query += " ORDER BY timestamp DESC";
 
         String PEBBLES_SELECT_QUERY = String.format(query, params.toArray());
         SQLiteDatabase db = getReadableDatabase();

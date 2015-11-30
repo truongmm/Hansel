@@ -271,7 +271,6 @@ public class MapFragment extends Fragment implements
                 Double.toString(location.getLatitude()) + "," +
                 Double.toString(location.getLongitude());
         Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
-
     }
 
     /*
