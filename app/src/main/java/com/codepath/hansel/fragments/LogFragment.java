@@ -1,6 +1,8 @@
 package com.codepath.hansel.fragments;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
@@ -14,7 +16,6 @@ import com.codepath.hansel.models.Pebble;
 import com.codepath.hansel.utils.DatabaseHelper;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public abstract class LogFragment extends Fragment {
     protected SwipeRefreshLayout swipeContainer;
@@ -57,5 +58,10 @@ public abstract class LogFragment extends Fragment {
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
+    }
+
+    protected int getCurrentUserId() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        return sharedPreferences.getInt("user_id", 1);
     }
 }

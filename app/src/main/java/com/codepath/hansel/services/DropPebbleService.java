@@ -3,12 +3,16 @@ package com.codepath.hansel.services;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.widget.Toast;
 
 import com.codepath.hansel.models.Pebble;
 import com.codepath.hansel.models.User;
@@ -24,8 +28,11 @@ public class DropPebbleService extends Service implements LocationListener {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
+        showToast("Pebble drop service started");
+
         dbHelper = DatabaseHelper.getInstance(getApplicationContext());
-        currentUser = dbHelper.getUser(1);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        currentUser = dbHelper.getUser(sharedPreferences.getInt("user_id", 1));
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 4000, 0, this);
@@ -33,6 +40,7 @@ public class DropPebbleService extends Service implements LocationListener {
 
         if (currentLocation != null) {
             dbHelper.addPebble(new Pebble(currentUser, currentLocation.getLatitude(), currentLocation.getLongitude()));
+            showToast("Pebble dropped: " + currentLocation.getLatitude() + ", " + currentLocation.getLongitude());
         }
         return super.onStartCommand(intent, flags, startId);
     }
@@ -49,15 +57,15 @@ public class DropPebbleService extends Service implements LocationListener {
         return null;
     }
 
-//    public void showToast(final String message) {
-//        Handler mHandler = new Handler(getMainLooper());
-//        mHandler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
-//            }
-//        });
-//    }
+    public void showToast(final String message) {
+        Handler mHandler = new Handler(getMainLooper());
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
     @Override
     public void onLocationChanged(Location location) {
