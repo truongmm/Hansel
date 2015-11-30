@@ -4,8 +4,6 @@ import android.database.Cursor;
 
 import com.codepath.hansel.utils.DatabaseHelper;
 
-import java.sql.Timestamp;
-
 /**
  * Created by ryamada on 11/22/15.
  */
@@ -13,15 +11,7 @@ public class User {
     private long id;
     private String firstName;
     private String lastName;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
 
-//    public User(String firstName, String lastName, Timestamp createdAt, Timestamp updatedAt) {
-//        this.firstName = firstName;
-//        this.lastName = lastName;
-//        this.createdAt = createdAt;
-//        this.updatedAt = updatedAt;
-//    }
     public User(){}
 
     public User(String firstName, String lastName){

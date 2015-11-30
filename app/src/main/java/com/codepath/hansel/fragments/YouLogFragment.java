@@ -1,8 +1,6 @@
 package com.codepath.hansel.fragments;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +22,6 @@ public class YouLogFragment extends LogFragment {
 
     public void loadPebbles() {
         aPebbles.clear();
-        aPebbles.addAll(dbHelper.getPebblesForUsers(new User[]{dbHelper.getUser(getCurrentUserId())}));
+        aPebbles.addAll(dbHelper.getPebblesForUsers(new User[]{dbHelper.getUser(getCurrentUserId())}, true));
     }
 }

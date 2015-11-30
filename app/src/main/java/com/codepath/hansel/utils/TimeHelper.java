@@ -20,11 +20,20 @@ public class TimeHelper {
         return relativeDate;
     }
 
+    public static String getShortRelativeTimeAgo(Date date) {
+        return abbrRelativeTime(getRelativeTimeAgo(date));
+    }
+
     private static String abbrRelativeTime(String relativeTime){
         String[] time;
         time = relativeTime.split(" ");
 
-        if(time.length==3) relativeTime = time[0]+time[1].substring(0,1);
+        if(time.length==3) {
+            relativeTime = time[0]+time[1].substring(0,1);
+            if(time[2].equals("ago")){
+                relativeTime = "-" + relativeTime;
+            }
+        }
 
         return relativeTime;
     }
