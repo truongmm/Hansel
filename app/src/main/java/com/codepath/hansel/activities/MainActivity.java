@@ -1,5 +1,9 @@
 package com.codepath.hansel.activities;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -17,11 +21,16 @@ import com.codepath.hansel.fragments.MapFragment;
 import com.codepath.hansel.fragments.TimelineFragment;
 import com.codepath.hansel.models.Pebble;
 import com.codepath.hansel.models.User;
+import com.codepath.hansel.receivers.PebbleReceiver;
 import com.codepath.hansel.utils.DatabaseHelper;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
+
+    // Drop pebble every 5 secs
+    private final int PEBBLE_DROP_INTERVAL = 1000 * 5;
+
     private DrawerLayout mDrawer;
     private NavigationView nvDrawer;
     private Toolbar toolbar;
@@ -39,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
         setupDrawer();
         loadMapFragment();
         stubData();
+
+        schedulePebbleDrops();
     }
 
     private void stubData() {
@@ -154,5 +165,15 @@ public class MainActivity extends AppCompatActivity {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         drawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    public void schedulePebbleDrops() {
+        Intent intent = new Intent(MainActivity.this, PebbleReceiver.class);
+        final PendingIntent pIntent = PendingIntent.getBroadcast(MainActivity.this, PebbleReceiver.REQUEST_CODE,
+                intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        long firstMillis = System.currentTimeMillis(); // alarm is set right away
+        AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarm.setRepeating(AlarmManager.RTC_WAKEUP, firstMillis,
+                PEBBLE_DROP_INTERVAL, pIntent);
     }
 }
