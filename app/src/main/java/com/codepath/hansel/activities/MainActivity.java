@@ -1,7 +1,13 @@
 package com.codepath.hansel.activities;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
@@ -12,6 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.support.v4.app.Fragment;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.codepath.hansel.R;
 import com.codepath.hansel.fragments.MapFragment;
@@ -19,6 +26,7 @@ import com.codepath.hansel.fragments.SettingsFragment;
 import com.codepath.hansel.fragments.TimelineFragment;
 import com.codepath.hansel.models.Pebble;
 import com.codepath.hansel.models.User;
+import com.codepath.hansel.receivers.PebbleReceiver;
 import com.codepath.hansel.utils.DatabaseHelper;
 
 import java.util.ArrayList;
@@ -33,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseHelper dbHelper;
     private ArrayList<Pebble> pebbles;
 
+    private SharedPreferences sharedPreferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
         setupDrawer();
         loadMapFragment();
         stubData();
+        restoreSharedPreferences();
     }
 
     private void stubData() {
@@ -169,5 +180,34 @@ public class MainActivity extends AppCompatActivity {
         FragmentManager fm = getSupportFragmentManager();
         SettingsFragment settingsFragment = new SettingsFragment();
         settingsFragment.show(fm, "fragment_settings");
+    }
+
+    private void restoreSharedPreferences() {
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+
+        if (sharedPreferences.getBoolean("enable_tracking", false))
+            schedulePebbleDrops();
+        else
+            stopPebbleDrops();
+    }
+
+    public void schedulePebbleDrops() {
+        Intent intent = new Intent(MainActivity.this, PebbleReceiver.class);
+        final PendingIntent pebbleDropIntent = PendingIntent.getBroadcast(MainActivity.this, PebbleReceiver.REQUEST_CODE,
+                intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        long firstMillis = System.currentTimeMillis(); // alarm is set right away
+        AlarmManager pebbleDropAlarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        int pebbleDropInterval = 1000 * sharedPreferences.getInt("pebble_drop_interval", 15);
+        Toast.makeText(MainActivity.this, "Pebble service interval is " + (pebbleDropInterval / 1000) + " secs", Toast.LENGTH_SHORT).show();
+        pebbleDropAlarm.setRepeating(AlarmManager.RTC_WAKEUP, firstMillis, pebbleDropInterval, pebbleDropIntent);
+    }
+
+    public void stopPebbleDrops() {
+        Intent intent = new Intent(MainActivity.this, PebbleReceiver.class);
+        final PendingIntent pebbleDropIntent = PendingIntent.getBroadcast(MainActivity.this, PebbleReceiver.REQUEST_CODE,
+                intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        AlarmManager pebbleDropAlarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Toast.makeText(MainActivity.this, "Pebble service stopped", Toast.LENGTH_SHORT).show();
+        pebbleDropAlarm.cancel(pebbleDropIntent);
     }
 }

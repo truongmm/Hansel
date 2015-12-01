@@ -1,9 +1,5 @@
 package com.codepath.hansel.fragments;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -15,10 +11,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Switch;
-import android.widget.Toast;
 
 import com.codepath.hansel.R;
-import com.codepath.hansel.receivers.PebbleReceiver;
+import com.codepath.hansel.activities.MainActivity;
 
 public class SettingsFragment extends DialogFragment {
     final String[] VALID_USER_IDS = {"1 (Ray)", "2 (Melody)", "3 (Calvin)"};
@@ -150,29 +145,10 @@ public class SettingsFragment extends DialogFragment {
         preferencesEditor.putInt("pebble_drop_interval", pebbleDropInterval);
         preferencesEditor.commit();
 
+        MainActivity mainActivity = (MainActivity) getContext();
         if (sharedPreferences.getBoolean("enable_tracking", false))
-            schedulePebbleDrops();
+            mainActivity.schedulePebbleDrops();
         else
-            stopPebbleDrops();
-    }
-
-    private void schedulePebbleDrops() {
-        Intent intent = new Intent(getContext(), PebbleReceiver.class);
-        final PendingIntent pebbleDropIntent = PendingIntent.getBroadcast(getContext(), PebbleReceiver.REQUEST_CODE,
-                intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        long firstMillis = System.currentTimeMillis(); // alarm is set right away
-        AlarmManager pebbleDropAlarm = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
-        int pebbleDropInterval = 1000 * sharedPreferences.getInt("pebble_drop_interval", 15);
-        Toast.makeText(getActivity(), "Pebble service interval is " + (pebbleDropInterval/1000) + " secs", Toast.LENGTH_SHORT).show();
-        pebbleDropAlarm.setRepeating(AlarmManager.RTC_WAKEUP, firstMillis, pebbleDropInterval, pebbleDropIntent);
-    }
-
-    private void stopPebbleDrops() {
-        Intent intent = new Intent(getContext(), PebbleReceiver.class);
-        final PendingIntent pebbleDropIntent = PendingIntent.getBroadcast(getContext(), PebbleReceiver.REQUEST_CODE,
-                intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        AlarmManager pebbleDropAlarm = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
-        Toast.makeText(getActivity(), "Pebble service stopped", Toast.LENGTH_SHORT).show();
-        pebbleDropAlarm.cancel(pebbleDropIntent);
+            mainActivity.stopPebbleDrops();
     }
 }
