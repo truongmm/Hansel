@@ -6,7 +6,6 @@ import com.codepath.hansel.utils.DatabaseHelper;
 import com.codepath.hansel.utils.TimeHelper;
 import com.google.android.gms.maps.model.LatLng;
 
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -17,8 +16,6 @@ public class Pebble {
     private double latitude;
     private double longitude;
     private LatLng latLng;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
 
     public Pebble(){}
 

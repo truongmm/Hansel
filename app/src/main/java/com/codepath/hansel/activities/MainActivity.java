@@ -9,13 +9,13 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.support.v4.app.Fragment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -30,6 +30,7 @@ import com.codepath.hansel.receivers.PebbleReceiver;
 import com.codepath.hansel.utils.DatabaseHelper;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -62,26 +63,26 @@ public class MainActivity extends AppCompatActivity {
 
         long rayId = dbHelper.addOrUpdateUser(new User("Ray", "Yamada"));
         User ray = dbHelper.getUser(rayId);
-        dbHelper.addPebble(new Pebble(ray, 37.414479, -122.126450));
-        dbHelper.addPebble(new Pebble(ray, 37.417240, -122.130484));
-        dbHelper.addPebble(new Pebble(ray, 37.419652, -122.135054));
-        dbHelper.addPebble(new Pebble(ray, 37.423725, -122.134335));
-        dbHelper.addPebble(new Pebble(ray, 37.425105, -122.136588));
+        dbHelper.addPebble(new Pebble(ray, 37.414479, -122.126450),new Date(System.currentTimeMillis() - 3600 * 1000));
+        dbHelper.addPebble(new Pebble(ray, 37.417240, -122.130484),new Date(System.currentTimeMillis() - 2700 * 1000));
+        dbHelper.addPebble(new Pebble(ray, 37.419652, -122.135054),new Date(System.currentTimeMillis() - 1300 * 1000));
+        dbHelper.addPebble(new Pebble(ray, 37.423725, -122.134335),new Date(System.currentTimeMillis() - 500 * 1000));
+        dbHelper.addPebble(new Pebble(ray, 37.425105, -122.136588),new Date(System.currentTimeMillis() - 20 * 1000));
 
         long melodyId = dbHelper.addOrUpdateUser(new User("Melody", "Truong"));
         User melody = dbHelper.getUser(melodyId);
-        dbHelper.addPebble(new Pebble(melody, 37.426255, -122.134657));
-        dbHelper.addPebble(new Pebble(melody, 37.430055, -122.135000));
-        dbHelper.addPebble(new Pebble(melody, 37.424406, -122.144155));
-        dbHelper.addPebble(new Pebble(melody, 37.428351, -122.143050));
-        dbHelper.addPebble(new Pebble(melody, 37.424977, -122.136441));
+        dbHelper.addPebble(new Pebble(melody, 37.426255, -122.134657),new Date(System.currentTimeMillis() - 3550 * 1000));
+        dbHelper.addPebble(new Pebble(melody, 37.430055, -122.135000),new Date(System.currentTimeMillis() - 2640 * 1000));
+        dbHelper.addPebble(new Pebble(melody, 37.424406, -122.144155),new Date(System.currentTimeMillis() - 1250 * 1000));
+        dbHelper.addPebble(new Pebble(melody, 37.428351, -122.143050),new Date(System.currentTimeMillis() - 400 * 1000));
+        dbHelper.addPebble(new Pebble(melody, 37.424977, -122.136441),new Date(System.currentTimeMillis() - 10 * 1000));
 
         long calvinId = dbHelper.addOrUpdateUser(new User("Calvin", "Liang"));
         User calvin = dbHelper.getUser(calvinId);
-        dbHelper.addPebble(new Pebble(calvin, 37.411322, -122.139422));
-        dbHelper.addPebble(new Pebble(calvin, 37.420619, -122.149583));
-        dbHelper.addPebble(new Pebble(calvin, 37.426655, -122.150271));
-        dbHelper.addPebble(new Pebble(calvin, 37.424977, -122.136441));
+        dbHelper.addPebble(new Pebble(calvin, 37.411322, -122.139422),new Date(System.currentTimeMillis() - 3250 * 1000));
+        dbHelper.addPebble(new Pebble(calvin, 37.420619, -122.149583),new Date(System.currentTimeMillis() - 2500 * 1000));
+        dbHelper.addPebble(new Pebble(calvin, 37.426655, -122.150271),new Date(System.currentTimeMillis() - 1400 * 1000));
+        dbHelper.addPebble(new Pebble(calvin, 37.424977, -122.136441),new Date(System.currentTimeMillis() - 30 * 1000));
     }
 
     private void loadMapFragment() {

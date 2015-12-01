@@ -127,6 +127,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return pebbleId;
     }
 
+    public long addPebble(Pebble pebble, Date date) {
+        SQLiteDatabase db = getWritableDatabase();
+        long pebbleId = -1;
+        String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+        db.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(KEY_PEBBLE_USER_ID_FK, pebble.getUser().getId());
+            values.put(KEY_PEBBLE_LATITUDE, pebble.getLatitude());
+            values.put(KEY_PEBBLE_LONGITUDE, pebble.getLongitude());
+            values.put(KEY_PEBBLE_TIMESTAMP, dateTime);
+            values.put(KEY_PEBBLE_CREATED_AT, dateTime);
+            values.put(KEY_PEBBLE_UPDATED_AT, dateTime);
+
+            pebbleId = db.insertOrThrow(TABLE_PEBBLES, null, values);
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.d(TAG, "Error while trying to add pebble to database");
+        } finally {
+            db.endTransaction();
+        }
+        return pebbleId;
+    }
+
     public User getUser(long id) {
         SQLiteDatabase db = getReadableDatabase();
         User user = null;
@@ -194,19 +218,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return userId;
     }
 
-    public ArrayList<Pebble> getAllPebbles() {
-        return getPebbles(null, null);
+    public ArrayList<Pebble> getAllPebbles(){
+        return getPebbles(null, null, null, false);
     }
 
-    public ArrayList<Pebble> getPebblesForUsers(User[] whiteList) {
-        return getPebbles(whiteList, null);
+    public ArrayList<Pebble> getAllPebbles(boolean desc) {
+        return getPebbles(null, null, null, desc);
     }
 
-    public ArrayList<Pebble> getPebblesWithoutUsers(User[] blackList) {
-        return getPebbles(null, blackList);
+    public ArrayList<Pebble> getPebblesForUsers(User[] whiteList, boolean desc) {
+        return getPebbles(whiteList, null, null, desc);
     }
 
-    public ArrayList<Pebble> getPebbles(User[] whiteList, User[] blackList) {
+    public ArrayList<Pebble> getPebblesForUsersBeforeDate(User[] whiteList, Date date, boolean desc){
+        return getPebbles(whiteList, null, date, desc);
+    }
+
+    public ArrayList<Pebble> getPebblesWithoutUsers(User[] blackList, boolean desc) {
+        return getPebbles(null, blackList, null, desc);
+    }
+
+    public ArrayList<Pebble> getPebbles(User[] whiteList, User[] blackList, Date date, boolean desc) {
         ArrayList<Pebble> pebbles = new ArrayList<>();
         String query = "SELECT * FROM %s LEFT OUTER JOIN %s ON %s.%s = %s.%s WHERE 1 = 1";
         ArrayList<Object> params = new ArrayList<>();
@@ -222,7 +254,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             params.addAll(Arrays.asList(TABLE_USERS, KEY_USER_ID, TextUtils.join(",", blackList)));
         }
 
-        query += " ORDER BY timestamp DESC";
+        if(date != null){
+            query += " AND %s.%s < '%s'";
+            params.addAll(Arrays.asList(TABLE_PEBBLES, KEY_PEBBLE_TIMESTAMP, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date)));
+        }
+
+        if (desc) {
+            query += " ORDER BY timestamp DESC";
+        }
 
         String PEBBLES_SELECT_QUERY = String.format(query, params.toArray());
         SQLiteDatabase db = getReadableDatabase();

@@ -14,12 +14,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.codepath.hansel.R;
 import com.codepath.hansel.models.Pebble;
 import com.codepath.hansel.models.User;
 import com.codepath.hansel.utils.DatabaseHelper;
+import com.codepath.hansel.utils.TimeHelper;
 import com.directions.route.AbstractRouting;
 import com.directions.route.Route;
 import com.directions.route.Routing;
@@ -41,6 +44,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,7 +54,11 @@ public class MapFragment extends Fragment implements
         RoutingListener,
         LocationListener {
 
+    private Date earliestDate;
+    private Date seekDate;
     private SupportMapFragment mapFragment;
+    private SeekBar sbMapRelativeTime;
+    private TextView tvMapRelativeTime;
     private GoogleMap map;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
@@ -61,7 +69,7 @@ public class MapFragment extends Fragment implements
     private ProgressDialog progressDialog;
     private long UPDATE_INTERVAL = 60000;  /* 60 secs */
     private long FASTEST_INTERVAL = 5000; /* 5 secs */
-    private int[] colors = new int[]{R.color.route_blue ,R.color.route_orange,R.color.route_purple,R.color.route_red,R.color.route_teal, R.color.route_yellow, R.color.route_blue_grey};
+    private int[] colors = new int[]{R.color.route_blue, R.color.route_orange, R.color.route_purple, R.color.route_red, R.color.route_teal, R.color.route_yellow, R.color.route_blue_grey};
     private int routeIndex = 0;
     /*
      * Define a request code to send to Google Play services This code is
@@ -73,17 +81,57 @@ public class MapFragment extends Fragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         polylines = new ArrayList<>();
-        usersPebblesMap = new HashMap<>();
         dbHelper = DatabaseHelper.getInstance(getContext());
         fetchData();
-        // setLatLngs();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_map, container, false);
-        mapFragment = ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map));
+        sbMapRelativeTime = (SeekBar) view.findViewById(R.id.sbMapRelativeTime);
+        sbMapRelativeTime.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                seekDate = seekDate(seekBar.getProgress());
+//                Toast.makeText(getActivity(), String.valueOf(), Toast.LENGTH_LONG).show();
+                fetchData();
+                if (mapFragment != null) {
+                    mapFragment.getMapAsync(new OnMapReadyCallback() {
+                        @Override
+                        public void onMapReady(GoogleMap map) {
+                            loadMap(map);
+                            drawRoutes();
+                        }
+                    });
+                } else {
+                    Toast.makeText(getActivity(), "Error - Map Fragment was null!!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                String relativeTime;
+                if (progress == 100) {
+                    relativeTime = "Now";
+                } else {
+                    relativeTime = TimeHelper.getShortRelativeTimeAgo(seekDate(progress));
+                }
+                tvMapRelativeTime.setText(relativeTime);
+            }
+
+            public Date seekDate(int progress){
+                long currentTime = System.currentTimeMillis();
+                return new Date(currentTime - (currentTime - earliestDate.getTime()) * (100 - progress) / 100);
+            }
+        });
+        tvMapRelativeTime = (TextView) view.findViewById(R.id.tvMapRelativeTime);
+        mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
             mapFragment.getMapAsync(new OnMapReadyCallback() {
                 @Override
@@ -98,44 +146,48 @@ public class MapFragment extends Fragment implements
         return view;
     }
 
-    private void fetchData(){
+    private void fetchData() {
+        usersPebblesMap = new HashMap<>();
         ArrayList<User> users = dbHelper.getAllUsers();
-        for(User user: users){
-            usersPebblesMap.put(user, dbHelper.getPebblesForUsers(new User[]{user}));
+        for (User user : users) {
+            ArrayList<Pebble> pebbles = dbHelper.getPebblesForUsersBeforeDate(new User[]{user}, seekDate, false);
+            if (!pebbles.isEmpty()) {
+                Date pebbleEarliestDate = pebbles.get(0).getDate();
+                if (earliestDate == null || earliestDate.after(pebbleEarliestDate)) {
+                    earliestDate = pebbleEarliestDate;
+                }
+                usersPebblesMap.put(user, pebbles);
+            }
         }
     }
 
-//    private void setLatLngs() {
-//        latLngs = new ArrayList<>();
-//        for (Pebble pebble : pebbles) {
-//            latLngs.add(pebble.getLatLng());
-//        }
-//    }
-
-    private void drawRoutes(){
+    private void drawRoutes() {
         progressDialog = ProgressDialog.show(getActivity(), "Please wait.",
                 "Fetching route information.", true);
 
-        for (Map.Entry<User, ArrayList<Pebble>> entry : usersPebblesMap.entrySet())
-        {
+        for (Map.Entry<User, ArrayList<Pebble>> entry : usersPebblesMap.entrySet()) {
             ArrayList<LatLng> latLngs = new ArrayList<>();
-            for(Pebble pebble : entry.getValue()){
+            for (Pebble pebble : entry.getValue()) {
                 latLngs.add(pebble.getLatLng());
             }
-
-            Routing routing = new Routing.Builder()
-                    .travelMode(AbstractRouting.TravelMode.DRIVING)
-                    .withListener(this)
-                    .alternativeRoutes(false)
-                    .waypoints(latLngs)
-                    .build();
-            routing.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);;
+            if(latLngs.size() > 1) {
+                Routing routing = new Routing.Builder()
+                        .travelMode(AbstractRouting.TravelMode.WALKING)
+                        .withListener(this)
+                        .alternativeRoutes(false)
+                        .waypoints(latLngs)
+                        .build();
+                routing.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            }
         }
     }
 
     protected void loadMap(GoogleMap googleMap) {
         map = googleMap;
         if (map != null) {
+            routeIndex = 0;
+            map.clear();
+
             // Map is ready
             Toast.makeText(getActivity(), "Map Fragment was loaded properly!", Toast.LENGTH_SHORT).show();
             map.setMyLocationEnabled(true);
@@ -154,10 +206,11 @@ public class MapFragment extends Fragment implements
         }
     }
 
-    private void loadMarkers(){
+    private void loadMarkers() {
+
         for (Map.Entry<User, ArrayList<Pebble>> entry : usersPebblesMap.entrySet()) {
-            for(Pebble pebble : entry.getValue()){
-                map.addMarker(new MarkerOptions().position(pebble.getLatLng()).title(pebble.getUser().getFullName() + "\n" + pebble.getRelativeTimeAgo() + "\n" +pebble.getCoordinate()));
+            for (Pebble pebble : entry.getValue()) {
+                map.addMarker(new MarkerOptions().position(pebble.getLatLng()).title(pebble.getUser().getFullName() + "\n" + pebble.getRelativeTimeAgo() + "\n" + pebble.getCoordinate()));
             }
         }
     }
@@ -199,7 +252,7 @@ public class MapFragment extends Fragment implements
         switch (requestCode) {
 
             case CONNECTION_FAILURE_RESOLUTION_REQUEST:
-			/*
+            /*
 			 * If the result code is Activity.RESULT_OK, try to connect again
 			 */
                 switch (resultCode) {
@@ -270,7 +323,7 @@ public class MapFragment extends Fragment implements
         String msg = "Updated Location: " +
                 Double.toString(location.getLatitude()) + "," +
                 Double.toString(location.getLongitude());
-        Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
     }
 
     /*
@@ -318,7 +371,7 @@ public class MapFragment extends Fragment implements
     @Override
     public void onRoutingFailure() {
         progressDialog.dismiss();
-        Toast.makeText(getActivity(),"Something went wrong, Try again", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), "Something went wrong, Try again", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -345,7 +398,7 @@ public class MapFragment extends Fragment implements
 
         polylines = new ArrayList<>();
         //add route(s) to the map.
-        for (int i = 0; i <route.size(); i++) {
+        for (int i = 0; i < route.size(); i++) {
             PolylineOptions polyOptions = new PolylineOptions();
             polyOptions.color(getResources().getColor(colors[routeIndex]));
             polyOptions.width(10 + i * 3);
@@ -353,7 +406,7 @@ public class MapFragment extends Fragment implements
             Polyline polyline = map.addPolyline(polyOptions);
             polylines.add(polyline);
 
-            Toast.makeText(getActivity().getApplicationContext(),"Route "+ (i+1) +": distance - "+ route.get(i).getDistanceValue()+": duration - "+ route.get(i).getDurationValue(),Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity().getApplicationContext(), "Route " + (i + 1) + ": distance - " + route.get(i).getDistanceValue() + ": duration - " + route.get(i).getDurationValue(), Toast.LENGTH_SHORT).show();
         }
         routeIndex++;
 //        // Start marker
@@ -370,7 +423,8 @@ public class MapFragment extends Fragment implements
     }
 
     @Override
-    public void onRoutingCancelled() {}
+    public void onRoutingCancelled() {
+    }
 
     // Define a DialogFragment that displays the error dialog
     public static class ErrorDialogFragment extends DialogFragment {
