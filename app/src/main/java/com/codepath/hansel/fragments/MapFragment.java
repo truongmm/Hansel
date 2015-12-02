@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.codepath.hansel.R;
+import com.codepath.hansel.models.Mapper;
 import com.codepath.hansel.models.Pebble;
 import com.codepath.hansel.models.User;
 import com.codepath.hansel.utils.DatabaseHelper;
@@ -45,8 +46,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 public class MapFragment extends Fragment implements
         GoogleApiClient.ConnectionCallbacks,
@@ -63,8 +63,7 @@ public class MapFragment extends Fragment implements
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private DatabaseHelper dbHelper;
-    private HashMap<User, ArrayList<Pebble>> usersPebblesMap;
-    // private ArrayList<Pebble> pebbles;
+    private Mapper mapper;
     private ArrayList<Polyline> polylines;
     private ProgressDialog progressDialog;
     private long UPDATE_INTERVAL = 60000;  /* 60 secs */
@@ -147,29 +146,26 @@ public class MapFragment extends Fragment implements
     }
 
     private void fetchData() {
-        usersPebblesMap = new HashMap<>();
-        ArrayList<User> users = dbHelper.getAllUsers();
-        for (User user : users) {
-            ArrayList<Pebble> pebbles = dbHelper.getPebblesForUsersBeforeDate(new User[]{user}, seekDate, false);
+        List<User> users = new ArrayList<>();
+        for (User user : dbHelper.getAllUsers()) {
+            ArrayList<Pebble> pebbles = dbHelper.getPebblesForUsers(new User[]{user}, false);
             if (!pebbles.isEmpty()) {
-                Date pebbleEarliestDate = pebbles.get(0).getDate();
-                if (earliestDate == null || earliestDate.after(pebbleEarliestDate)) {
-                    earliestDate = pebbleEarliestDate;
-                }
-                usersPebblesMap.put(user, pebbles);
+                user.setPebbles(pebbles);
+                users.add(user);
             }
         }
+        mapper = new Mapper(users);
     }
 
     private void drawRoutes() {
         progressDialog = ProgressDialog.show(getActivity(), "Please wait.",
                 "Fetching route information.", true);
 
-        for (Map.Entry<User, ArrayList<Pebble>> entry : usersPebblesMap.entrySet()) {
-            ArrayList<LatLng> latLngs = new ArrayList<>();
-            for (Pebble pebble : entry.getValue()) {
-                latLngs.add(pebble.getLatLng());
+        for(User user : mapper.getUsers()){
+            for (Pebble pebble : user.getPebbles()) {
+                map.addMarker(new MarkerOptions().position(pebble.getLatLng()).title(user.getFullName() + "\n" + pebble.getRelativeTimeAgo() + "\n" + pebble.getCoordinate()));
             }
+            ArrayList<LatLng> latLngs = user.getLatLngs();
             if(latLngs.size() > 1) {
                 Routing routing = new Routing.Builder()
                         .travelMode(AbstractRouting.TravelMode.WALKING)
@@ -198,20 +194,9 @@ public class MapFragment extends Fragment implements
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this).build();
 
-            loadMarkers();
-
             connectClient();
         } else {
             Toast.makeText(getActivity(), "Error - Map was null!!", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void loadMarkers() {
-
-        for (Map.Entry<User, ArrayList<Pebble>> entry : usersPebblesMap.entrySet()) {
-            for (Pebble pebble : entry.getValue()) {
-                map.addMarker(new MarkerOptions().position(pebble.getLatLng()).title(pebble.getUser().getFullName() + "\n" + pebble.getRelativeTimeAgo() + "\n" + pebble.getCoordinate()));
-            }
         }
     }
 
