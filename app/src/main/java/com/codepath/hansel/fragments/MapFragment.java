@@ -40,6 +40,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -64,6 +65,7 @@ public class MapFragment extends Fragment implements
     private LocationRequest mLocationRequest;
     private DatabaseHelper dbHelper;
     private Mapper mapper;
+    private LatLngBounds.Builder boundBuilder;
     private ArrayList<Polyline> polylines;
     private ProgressDialog progressDialog;
     private long UPDATE_INTERVAL = 60000;  /* 60 secs */
@@ -126,7 +128,7 @@ public class MapFragment extends Fragment implements
 
             public Date seekDate(int progress){
                 long currentTime = System.currentTimeMillis();
-                return new Date(currentTime - (currentTime - earliestDate.getTime()) * (100 - progress) / 100);
+                return new Date(currentTime - (currentTime - mapper.getEarliestDate().getTime()) * (100 - progress) / 100);
             }
         });
         tvMapRelativeTime = (TextView) view.findViewById(R.id.tvMapRelativeTime);
@@ -148,7 +150,7 @@ public class MapFragment extends Fragment implements
     private void fetchData() {
         List<User> users = new ArrayList<>();
         for (User user : dbHelper.getAllUsers()) {
-            ArrayList<Pebble> pebbles = dbHelper.getPebblesForUsers(new User[]{user}, false);
+            ArrayList<Pebble> pebbles = dbHelper.getPebblesForUsersBeforeDate(new User[]{user}, seekDate, false);
             if (!pebbles.isEmpty()) {
                 user.setPebbles(pebbles);
                 users.add(user);
@@ -160,9 +162,10 @@ public class MapFragment extends Fragment implements
     private void drawRoutes() {
         progressDialog = ProgressDialog.show(getActivity(), "Please wait.",
                 "Fetching route information.", true);
-
+        boundBuilder = new LatLngBounds.Builder();
         for(User user : mapper.getUsers()){
             for (Pebble pebble : user.getPebbles()) {
+                boundBuilder.include(pebble.getLatLng());
                 map.addMarker(new MarkerOptions().position(pebble.getLatLng()).title(user.getFullName() + "\n" + pebble.getRelativeTimeAgo() + "\n" + pebble.getCoordinate()));
             }
             ArrayList<LatLng> latLngs = user.getLatLngs();
@@ -176,6 +179,7 @@ public class MapFragment extends Fragment implements
                 routing.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         }
+
     }
 
     protected void loadMap(GoogleMap googleMap) {
@@ -285,9 +289,9 @@ public class MapFragment extends Fragment implements
         Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (location != null) {
             Toast.makeText(getActivity(), "GPS location was found!", Toast.LENGTH_SHORT).show();
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
-            map.animateCamera(cameraUpdate);
+//            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+//            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
+//            map.animateCamera(cameraUpdate);
             startLocationUpdates();
         } else {
             Toast.makeText(getActivity(), "Current location was null, enable GPS on emulator!", Toast.LENGTH_SHORT).show();
@@ -374,6 +378,8 @@ public class MapFragment extends Fragment implements
 
 //        map.moveCamera(center);
 
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(boundBuilder.build(), 100);
+        map.animateCamera(cameraUpdate);
 
 //        if(polylines.size()>0) {
 //            for (Polyline poly : polylines) {
