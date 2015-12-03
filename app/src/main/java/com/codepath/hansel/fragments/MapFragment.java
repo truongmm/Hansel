@@ -163,6 +163,7 @@ public class MapFragment extends Fragment implements
         progressDialog = ProgressDialog.show(getActivity(), "Please wait.",
                 "Fetching route information.", true);
         boundBuilder = new LatLngBounds.Builder();
+        boolean noRoute = true;
         for(User user : mapper.getUsers()){
             for (Pebble pebble : user.getPebbles()) {
                 boundBuilder.include(pebble.getLatLng());
@@ -177,7 +178,11 @@ public class MapFragment extends Fragment implements
                         .waypoints(latLngs)
                         .build();
                 routing.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                noRoute = false;
             }
+        }
+        if(noRoute){
+            progressDialog.dismiss();
         }
 
     }
