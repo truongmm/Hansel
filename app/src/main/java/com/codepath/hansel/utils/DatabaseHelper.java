@@ -29,6 +29,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String KEY_USER_ID = "id";
     public static final String KEY_USER_FIRST_NAME = "firstName";
     public static final String KEY_USER_LAST_NAME = "lastName";
+    public static final String KEY_USER_IMAGE_URL = "imageUrl";
     private static final String KEY_USER_CREATED_AT = "createdAt";
     private static final String KEY_USER_UPDATED_AT = "updatedAt";
     // https://stackoverflow.com/questions/14461851/how-to-have-an-automatic-timestamp-in-sqlite
@@ -74,6 +75,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 KEY_USER_ID + " INTEGER PRIMARY KEY," +
                 KEY_USER_FIRST_NAME + " TEXT," +
                 KEY_USER_LAST_NAME + " TEXT," +
+                KEY_USER_IMAGE_URL + " TEXT," +
                 KEY_USER_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
                 KEY_USER_UPDATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP" +
                 ")";
@@ -199,6 +201,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             ContentValues values = new ContentValues();
             values.put(KEY_USER_FIRST_NAME, user.getFirstName());
             values.put(KEY_USER_LAST_NAME, user.getLastName());
+            values.put(KEY_USER_IMAGE_URL, user.getImageUrl());
             values.put(KEY_PEBBLE_CREATED_AT, dateTime);
             values.put(KEY_PEBBLE_UPDATED_AT, dateTime);
 

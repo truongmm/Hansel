@@ -64,6 +64,10 @@ public class Pebble {
         return user;
     }
 
+    public String getUserImageUrl() {
+        return user.getImageUrl();
+    }
+
     public void setUser(User user){
         this.user = user;
     }
