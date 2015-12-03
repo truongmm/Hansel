@@ -2,6 +2,7 @@ package com.codepath.hansel.models;
 
 import com.codepath.hansel.R;
 import com.directions.route.Route;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
 import java.util.Date;
 import java.util.List;
@@ -10,8 +11,8 @@ public class Mapper {
     private static Mapper instance;
     private List<User> users;
     private Date earliestDate = null;
-    private int[] colors = new int[]{R.color.route_blue, R.color.route_orange, R.color.route_purple, R.color.route_red, R.color.route_teal, R.color.route_yellow, R.color.route_blue_grey};
-
+    private int[] colors = new int[]{R.color.route_red, R.color.route_green, R.color.route_blue, R.color.route_orange, R.color.route_cyan, R.color.route_purple, R.color.route_yellow};
+    private float[] hues = new float[]{BitmapDescriptorFactory.HUE_RED, BitmapDescriptorFactory.HUE_GREEN, BitmapDescriptorFactory.HUE_BLUE, BitmapDescriptorFactory.HUE_ORANGE, BitmapDescriptorFactory.HUE_CYAN, BitmapDescriptorFactory.HUE_VIOLET, BitmapDescriptorFactory.HUE_YELLOW};
     public Mapper() {
     }
 
@@ -24,13 +25,16 @@ public class Mapper {
 
     public void setUsers(List<User> users) {
         this.users = users;
-        assignColors();
+        assignColorsAndHues();
         setEarliestDate();
     }
 
-    private void assignColors() {
+    private void assignColorsAndHues() {
         for (int i = 0; i < users.size(); i++) {
-            users.get(i).setColor(colors[i % colors.length]);
+            User user = users.get(i);
+            int index = i % colors.length;
+            user.setColor(colors[index]);
+            user.setHue(hues[index]);
         }
     }
 

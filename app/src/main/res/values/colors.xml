@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="route_blue">#03A9F4</color>
     <color name="route_red">#F44336</color>
-    <color name="route_purple">#673AB7</color>
-    <color name="route_teal">#009688</color>
-    <color name="route_yellow">#FFEB3B</color>
+    <color name="route_green">#4CAF50</color>
+    <color name="route_blue">#03A9F4</color>
     <color name="route_orange">#FF9800</color>
-    <color name="route_blue_grey">#607D8B</color>
+    <color name="route_cyan">#00BCD4</color>
+    <color name="route_purple">#673AB7</color>
+    <color name="route_yellow">#FFEB3B</color>
 </resources>
