@@ -70,7 +70,6 @@ public class MapFragment extends Fragment implements
     private ProgressDialog progressDialog;
     private long UPDATE_INTERVAL = 60000;  /* 60 secs */
     private long FASTEST_INTERVAL = 5000; /* 5 secs */
-    private int[] colors = new int[]{R.color.route_blue, R.color.route_orange, R.color.route_purple, R.color.route_red, R.color.route_teal, R.color.route_yellow, R.color.route_blue_grey};
     private int routeIndex = 0;
     /*
      * Define a request code to send to Google Play services This code is
@@ -126,9 +125,13 @@ public class MapFragment extends Fragment implements
                 tvMapRelativeTime.setText(relativeTime);
             }
 
-            public Date seekDate(int progress){
-                long currentTime = System.currentTimeMillis();
-                return new Date(currentTime - (currentTime - mapper.getEarliestDate().getTime()) * (100 - progress) / 100);
+            public Date seekDate(int progress) {
+                Date earliestDate = mapper.getEarliestDate();
+                if (earliestDate != null) {
+                    long currentTime = System.currentTimeMillis();
+                    return new Date(currentTime - (currentTime - earliestDate.getTime()) * (100 - progress) / 100);
+                }
+                return null;
             }
         });
         tvMapRelativeTime = (TextView) view.findViewById(R.id.tvMapRelativeTime);
@@ -164,13 +167,13 @@ public class MapFragment extends Fragment implements
                 "Fetching route information.", true);
         boundBuilder = new LatLngBounds.Builder();
         boolean noRoute = true;
-        for(User user : mapper.getUsers()){
+        for (User user : mapper.getUsers()) {
             for (Pebble pebble : user.getPebbles()) {
                 boundBuilder.include(pebble.getLatLng());
                 map.addMarker(new MarkerOptions().position(pebble.getLatLng()).title(user.getFullName() + "\n" + pebble.getRelativeTimeAgo() + "\n" + pebble.getCoordinate()));
             }
             ArrayList<LatLng> latLngs = user.getLatLngs();
-            if(latLngs.size() > 1) {
+            if (latLngs.size() > 1) {
                 Routing routing = new Routing.Builder()
                         .travelMode(AbstractRouting.TravelMode.WALKING)
                         .withListener(this)
@@ -181,7 +184,7 @@ public class MapFragment extends Fragment implements
                 noRoute = false;
             }
         }
-        if(noRoute){
+        if (noRoute) {
             progressDialog.dismiss();
         }
 
@@ -247,7 +250,7 @@ public class MapFragment extends Fragment implements
 
             case CONNECTION_FAILURE_RESOLUTION_REQUEST:
             /*
-			 * If the result code is Activity.RESULT_OK, try to connect again
+             * If the result code is Activity.RESULT_OK, try to connect again
 			 */
                 switch (resultCode) {
                     case Activity.RESULT_OK:
@@ -338,8 +341,8 @@ public class MapFragment extends Fragment implements
      */
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-		/*
-		 * Google Play services can resolve some errors it detects. If the error
+        /*
+         * Google Play services can resolve some errors it detects. If the error
 		 * has a resolution, try sending an Intent to start a Google Play
 		 * services activity that can resolve error.
 		 */
@@ -348,8 +351,8 @@ public class MapFragment extends Fragment implements
                 // Start an Activity that tries to resolve the error
                 connectionResult.startResolutionForResult(getActivity(),
                         CONNECTION_FAILURE_RESOLUTION_REQUEST);
-				/*
-				 * Thrown if Google Play services canceled the original
+                /*
+                 * Thrown if Google Play services canceled the original
 				 * PendingIntent
 				 */
             } catch (IntentSender.SendIntentException e) {
@@ -374,14 +377,16 @@ public class MapFragment extends Fragment implements
     }
 
     @Override
-    public void onRoutingSuccess(ArrayList<Route> route, int shortestRouteIndex) {
+    public void onRoutingSuccess(ArrayList<Route> routes, int shortestRouteIndex) {
         progressDialog.dismiss();
 //        LatLng start = latLngs.get(0);
 //        LatLng end = latLngs.get(latLngs.size() - 1);
 //        CameraUpdate center = CameraUpdateFactory.newLatLng(start);
 //        CameraUpdate zoom = CameraUpdateFactory.zoomTo(16);
-
+        Route route = routes.get(0);
 //        map.moveCamera(center);
+        User user = mapper.getBestUserForRoute(route);
+        user.setRoute(route);
 
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(boundBuilder.build(), 100);
         map.animateCamera(cameraUpdate);
@@ -394,16 +399,16 @@ public class MapFragment extends Fragment implements
 
         polylines = new ArrayList<>();
         //add route(s) to the map.
-        for (int i = 0; i < route.size(); i++) {
-            PolylineOptions polyOptions = new PolylineOptions();
-            polyOptions.color(getResources().getColor(colors[routeIndex]));
-            polyOptions.width(10 + i * 3);
-            polyOptions.addAll(route.get(i).getPoints());
-            Polyline polyline = map.addPolyline(polyOptions);
-            polylines.add(polyline);
 
-            Toast.makeText(getActivity().getApplicationContext(), "Route " + (i + 1) + ": distance - " + route.get(i).getDistanceValue() + ": duration - " + route.get(i).getDurationValue(), Toast.LENGTH_SHORT).show();
-        }
+        PolylineOptions polyOptions = new PolylineOptions();
+        polyOptions.color(getResources().getColor(user.getColor()));
+        polyOptions.width(10);
+        polyOptions.addAll(route.getPoints());
+        Polyline polyline = map.addPolyline(polyOptions);
+        polylines.add(polyline);
+
+//            Toast.makeText(getActivity().getApplicationContext(), "Route " + (i + 1) + ": distance - " + route.get(i).getDistanceValue() + ": duration - " + route.get(i).getDurationValue(), Toast.LENGTH_SHORT).show();
+
         routeIndex++;
 //        // Start marker
 //        MarkerOptions options = new MarkerOptions();
