@@ -255,7 +255,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if(date != null){
-            query += " AND %s.%s < '%s'";
+            query += " AND %s.%s <= '%s'";
             params.addAll(Arrays.asList(TABLE_PEBBLES, KEY_PEBBLE_TIMESTAMP, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date)));
         }
 
