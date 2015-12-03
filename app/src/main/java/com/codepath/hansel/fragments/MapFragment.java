@@ -39,6 +39,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -169,10 +170,22 @@ public class MapFragment extends Fragment implements
         boundBuilder = new LatLngBounds.Builder();
         boolean noRoute = true;
         for (User user : mapper.getUsers()) {
-            for (Pebble pebble : user.getPebbles()) {
+            ArrayList<Pebble> pebbles = user.getPebbles();
+            for(int i = 0; i < pebbles.size(); i++){
+                Pebble pebble = pebbles.get(i);
                 boundBuilder.include(pebble.getLatLng());
-                map.addMarker(new MarkerOptions().position(pebble.getLatLng()).title(user.getFullName() + "\n" + pebble.getRelativeTimeAgo() + "\n" + pebble.getCoordinate()));
+
+                MarkerOptions options = new MarkerOptions();
+                options.position(pebble.getLatLng());
+                options.title(user.getFullName() + "\n" + pebble.getRelativeTimeAgo() + "\n" + pebble.getCoordinate());
+                if(i == pebbles.size() - 1){
+                    options.icon(BitmapDescriptorFactory.defaultMarker(user.getHue()));
+                }else{
+                    options.icon(BitmapDescriptorFactory.fromResource(R.drawable.pebble));
+                }
+                map.addMarker(options);
             }
+
             ArrayList<LatLng> latLngs = user.getLatLngs();
             if (latLngs.size() > 1) {
                 Routing routing = new Routing.Builder()

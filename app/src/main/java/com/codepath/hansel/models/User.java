@@ -25,6 +25,7 @@ public class User {
     private ArrayList<Pebble> pebbles;
     private Route route;
     private int color;
+    private float hue;
 
     public User() {
     }
@@ -134,4 +135,11 @@ public class User {
         this.color = color;
     }
 
+    public float getHue() {
+        return hue;
+    }
+
+    public void setHue(float hue) {
+        this.hue = hue;
+    }
 }
