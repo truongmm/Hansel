@@ -23,13 +23,14 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/user_id_label"
-        android:id="@+id/tvUserIdLabel"
+        android:text="@string/active_user_label"
+        android:id="@+id/tvActiveUserLabel"
         android:layout_below="@+id/swtchTracking"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_marginTop="30dp"
-        android:layout_marginRight="15dp" />
+        android:layout_marginRight="15dp"
+        android:textColor="@android:color/black" />
 
     <Spinner
         android:layout_width="wrap_content"
@@ -37,8 +38,8 @@
         android:id="@+id/spnrUserId"
         android:layout_below="@+id/swtchTracking"
         android:layout_marginTop="15dp"
-        android:layout_toRightOf="@+id/tvUserIdLabel"
-        android:layout_toEndOf="@+id/tvUserIdLabel" />
+        android:layout_toRightOf="@+id/tvActiveUserLabel"
+        android:layout_toEndOf="@+id/tvActiveUserLabel" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -49,7 +50,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_marginTop="30dp"
-        android:layout_marginRight="15dp" />
+        android:layout_marginRight="15dp"
+        android:textColor="@android:color/black" />
 
     <Spinner
         android:layout_width="wrap_content"

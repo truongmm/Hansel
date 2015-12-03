@@ -17,7 +17,7 @@ import com.codepath.hansel.R;
 import com.codepath.hansel.activities.MainActivity;
 
 public class SettingsFragment extends DialogFragment {
-    final String[] VALID_USER_IDS = {"1 (Ray)", "2 (Melody)", "3 (Calvin)"};
+    final String[] VALID_USERS = {"Ray", "Melody", "Calvin"};
     final String[] VALID_PEBBLE_DROP_INTERVALS = {"15 secs", "30 secs", "1 min", "5 mins", "15 mins"};
 
     SharedPreferences sharedPreferences;
@@ -50,7 +50,7 @@ public class SettingsFragment extends DialogFragment {
         swtchTracking.setChecked(sharedPreferences.getBoolean("enable_tracking", false));
 
         spnrUserId = (Spinner) view.findViewById(R.id.spnrUserId);
-        ArrayAdapter<String> userIdAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, VALID_USER_IDS);
+        ArrayAdapter<String> userIdAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, VALID_USERS);
         spnrUserId.setAdapter(userIdAdapter);
         spnrUserId.setSelection(getSavedUserId());
 
@@ -72,13 +72,13 @@ public class SettingsFragment extends DialogFragment {
     private int getSelectedUserId() {
         int userId = 1;
         switch (spnrUserId.getSelectedItem().toString()) {
-            case "1 (Ray)":
+            case "Ray":
                 userId = 1;
                 break;
-            case "2 (Melody)":
+            case "Melody":
                 userId = 2;
                 break;
-            case "3 (Calvin)":
+            case "Calvin":
                 userId = 3;
                 break;
         }
