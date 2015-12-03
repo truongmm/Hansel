@@ -24,6 +24,7 @@ import com.codepath.hansel.R;
 import com.codepath.hansel.fragments.MapFragment;
 import com.codepath.hansel.fragments.SettingsFragment;
 import com.codepath.hansel.fragments.TimelineFragment;
+import com.codepath.hansel.models.Mapper;
 import com.codepath.hansel.models.Pebble;
 import com.codepath.hansel.models.User;
 import com.codepath.hansel.receivers.PebbleReceiver;
@@ -31,6 +32,7 @@ import com.codepath.hansel.utils.DatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private ActionBarDrawerToggle drawerToggle;
 
     private DatabaseHelper dbHelper;
+    private Mapper mapper;
     private ArrayList<Pebble> pebbles;
 
     private SharedPreferences sharedPreferences;
@@ -53,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         setupDrawer();
         loadMapFragment();
         stubData();
+        constructMapper();
         restoreSharedPreferences();
     }
 
@@ -83,6 +87,19 @@ public class MainActivity extends AppCompatActivity {
         dbHelper.addPebble(new Pebble(calvin, 37.420619, -122.149583),new Date(System.currentTimeMillis() - 2500 * 1000));
         dbHelper.addPebble(new Pebble(calvin, 37.426655, -122.150271),new Date(System.currentTimeMillis() - 1400 * 1000));
         dbHelper.addPebble(new Pebble(calvin, 37.424977, -122.136441),new Date(System.currentTimeMillis() - 30 * 1000));
+    }
+
+    private void constructMapper(){
+        List<User> users = new ArrayList<>();
+        for (User user : dbHelper.getAllUsers()) {
+            ArrayList<Pebble> pebbles = dbHelper.getPebblesForUsers(new User[]{user}, false);
+            if (!pebbles.isEmpty()) {
+                user.setPebbles(pebbles);
+                users.add(user);
+            }
+        }
+        mapper = Mapper.getInstance();
+        mapper.setUsers(users);
     }
 
     private void loadMapFragment() {

@@ -82,7 +82,7 @@ public class MapFragment extends Fragment implements
         super.onCreate(savedInstanceState);
         polylines = new ArrayList<>();
         dbHelper = DatabaseHelper.getInstance(getContext());
-        fetchData();
+        mapper = Mapper.getInstance();
     }
 
     @Override
@@ -159,7 +159,7 @@ public class MapFragment extends Fragment implements
                 users.add(user);
             }
         }
-        mapper = new Mapper(users);
+        mapper.setUsers(users);
     }
 
     private void drawRoutes() {

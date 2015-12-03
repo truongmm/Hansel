@@ -7,13 +7,25 @@ import java.util.Date;
 import java.util.List;
 
 public class Mapper {
+    private static Mapper instance;
     private List<User> users;
+    private Date earliestDate = null;
     private int[] colors = new int[]{R.color.route_blue, R.color.route_orange, R.color.route_purple, R.color.route_red, R.color.route_teal, R.color.route_yellow, R.color.route_blue_grey};
 
-    public Mapper(List<User> users) {
-        this.users = users;
+    public Mapper() {
+    }
 
+    public static Mapper getInstance() {
+        if (instance == null) {
+            instance = new Mapper();
+        }
+        return instance;
+    }
+
+    public void setUsers(List<User> users) {
+        this.users = users;
         assignColors();
+        setEarliestDate();
     }
 
     private void assignColors() {
@@ -22,14 +34,16 @@ public class Mapper {
         }
     }
 
-    public Date getEarliestDate() {
-        Date earliestDate = null;
+    public void setEarliestDate() {
         for (User user : users) {
             Date userEarliestDate = user.getEarliestDate();
             if (earliestDate == null || earliestDate.after(userEarliestDate)) {
                 earliestDate = userEarliestDate;
             }
         }
+    }
+
+    public Date getEarliestDate() {
         return earliestDate;
     }
 
