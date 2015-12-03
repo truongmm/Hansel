@@ -21,7 +21,11 @@ public class TimeHelper {
     }
 
     public static String getShortRelativeTimeAgo(Date date) {
-        return abbrRelativeTime(getRelativeTimeAgo(date));
+        return shortRelativeTime(getRelativeTimeAgo(date));
+    }
+
+    private static String shortRelativeTime(String relativeTime){
+        return relativeTime.replace("second","sec").replace("minute","min");
     }
 
     private static String abbrRelativeTime(String relativeTime){
