@@ -136,8 +136,14 @@ public class MainActivity extends AppCompatActivity {
 
         Class fragmentClass;
         switch(menuItem.getItemId()) {
+            case R.id.nav_map:
+                fragmentClass = MapFragment.class;
+                break;
             case R.id.nav_timeline:
                 fragmentClass = TimelineFragment.class;
+                break;
+            case R.id.nav_settings:
+                fragmentClass = SettingsFragment.class;
                 break;
             default:
                 fragmentClass = MapFragment.class;

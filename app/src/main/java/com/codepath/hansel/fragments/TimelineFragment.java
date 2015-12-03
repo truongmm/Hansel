@@ -28,7 +28,7 @@ public class TimelineFragment extends Fragment {
 
     private void setupViews(View view) {
         ViewPager viewPager = (ViewPager) view.findViewById(R.id.viewPager);
-        viewPager.setAdapter(new LogPagerAdapter(getActivity().getSupportFragmentManager()));
+        viewPager.setAdapter(new LogPagerAdapter(getChildFragmentManager()));
 
         PagerSlidingTabStrip tabStrip = (PagerSlidingTabStrip) view.findViewById(R.id.tabs);
         tabStrip.setViewPager(viewPager);

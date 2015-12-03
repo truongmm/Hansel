@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import com.codepath.hansel.R;
 import com.codepath.hansel.activities.MainActivity;
@@ -39,7 +40,6 @@ public class SettingsFragment extends DialogFragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
         setupViews(view);
-        getDialog().setTitle("Settings");
         return view;
     }
 
@@ -64,7 +64,7 @@ public class SettingsFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
                 savePreferences();
-                getDialog().dismiss();
+                Toast.makeText(getActivity(), "Successfully Saved", Toast.LENGTH_LONG).show();
             }
         });
     }
