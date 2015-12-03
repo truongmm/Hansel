@@ -83,6 +83,7 @@ public class MapFragment extends Fragment implements
         polylines = new ArrayList<>();
         dbHelper = DatabaseHelper.getInstance(getContext());
         mapper = Mapper.getInstance();
+        fetchData();
     }
 
     @Override
@@ -120,7 +121,7 @@ public class MapFragment extends Fragment implements
                 if (progress == 100) {
                     relativeTime = "Now";
                 } else {
-                    relativeTime = TimeHelper.getShortRelativeTimeAgo(seekDate(progress));
+                    relativeTime = TimeHelper.getRelativeTimeAgo(seekDate(progress));
                 }
                 tvMapRelativeTime.setText(relativeTime);
             }
