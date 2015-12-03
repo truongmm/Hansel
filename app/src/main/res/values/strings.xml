@@ -9,6 +9,6 @@
     <string name="timeline">Timeline</string>
     <string name="enable_tracking">Enable Tracking</string>
     <string name="pebble_drop_interval">Drop Pebble Every</string>
-    <string name="user_id_label">Current User Id</string>
+    <string name="active_user_label">Active User</string>
     <string name="save">Save</string>
 </resources>

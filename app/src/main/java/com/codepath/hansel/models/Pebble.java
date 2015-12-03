@@ -6,10 +6,13 @@ import com.codepath.hansel.utils.DatabaseHelper;
 import com.codepath.hansel.utils.TimeHelper;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Pebble {
+    final DecimalFormat decimalFormat = new DecimalFormat("#.###");
     private long id;
     private User user;
     private Date date;
@@ -61,6 +64,10 @@ public class Pebble {
         return user;
     }
 
+    public String getUserImageUrl() {
+        return user.getImageUrl();
+    }
+
     public void setUser(User user){
         this.user = user;
     }
@@ -76,7 +83,8 @@ public class Pebble {
     public LatLng getLatLng() { return latLng; }
 
     public String getCoordinate() {
-        return latitude + ", " + longitude;
+        decimalFormat.setRoundingMode(RoundingMode.CEILING);
+        return decimalFormat.format(latitude) + ", " + decimalFormat.format(longitude);
     }
 
     public Date getDate() {

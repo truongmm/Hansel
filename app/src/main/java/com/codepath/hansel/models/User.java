@@ -21,6 +21,7 @@ public class User {
     private long id;
     private String firstName;
     private String lastName;
+    private String imageUrl;
     private ArrayList<Pebble> pebbles;
     private Route route;
     private int color;
@@ -28,9 +29,10 @@ public class User {
     public User() {
     }
 
-    public User(String firstName, String lastName) {
+    public User(String firstName, String lastName, String imageUrl) {
         this.firstName = firstName;
         this.lastName = lastName;
+        this.imageUrl = imageUrl;
     }
 
     public static User fromDB(Cursor cursor) {
@@ -40,6 +42,7 @@ public class User {
             user.id = cursor.getLong(cursor.getColumnIndex(DatabaseHelper.KEY_USER_ID));
             user.firstName = cursor.getString(cursor.getColumnIndex(DatabaseHelper.KEY_USER_FIRST_NAME));
             user.lastName = cursor.getString(cursor.getColumnIndex(DatabaseHelper.KEY_USER_LAST_NAME));
+            user.imageUrl = cursor.getString(cursor.getColumnIndex(DatabaseHelper.KEY_USER_IMAGE_URL));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -65,6 +68,10 @@ public class User {
 
     public String getFullName() {
         return firstName + " " + lastName;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
     }
 
     public ArrayList<Pebble> getPebbles() {
