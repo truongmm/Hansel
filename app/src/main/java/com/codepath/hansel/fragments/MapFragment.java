@@ -121,7 +121,7 @@ public class MapFragment extends Fragment implements
                 if (progress == 100) {
                     relativeTime = "Now";
                 } else {
-                    relativeTime = TimeHelper.getRelativeTimeAgo(seekDate(progress));
+                    relativeTime = TimeHelper.getShortRelativeTimeAgo(seekDate(progress));
                 }
                 tvMapRelativeTime.setText(relativeTime);
             }
