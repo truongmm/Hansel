@@ -5,14 +5,17 @@ import com.directions.route.Route;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class Mapper {
     private static Mapper instance;
     private List<User> users;
     private Date earliestDate = null;
-    private int[] colors = new int[]{R.color.route_red, R.color.route_green, R.color.route_blue, R.color.route_orange, R.color.route_cyan, R.color.route_purple, R.color.route_yellow};
-    private float[] hues = new float[]{BitmapDescriptorFactory.HUE_RED, BitmapDescriptorFactory.HUE_GREEN, BitmapDescriptorFactory.HUE_BLUE, BitmapDescriptorFactory.HUE_ORANGE, BitmapDescriptorFactory.HUE_CYAN, BitmapDescriptorFactory.HUE_VIOLET, BitmapDescriptorFactory.HUE_YELLOW};
+    private int[] colors = new int[]{R.color.route_orange, R.color.route_red, R.color.route_green, R.color.route_blue, R.color.route_purple, R.color.route_yellow, R.color.route_cyan};
+    private float[] hues = new float[]{BitmapDescriptorFactory.HUE_ORANGE, BitmapDescriptorFactory.HUE_RED, BitmapDescriptorFactory.HUE_GREEN, BitmapDescriptorFactory.HUE_BLUE, BitmapDescriptorFactory.HUE_VIOLET, BitmapDescriptorFactory.HUE_YELLOW, BitmapDescriptorFactory.HUE_CYAN};
+    private HashMap<Integer,Integer> userColor;
+
     public Mapper() {
     }
 
@@ -30,12 +33,18 @@ public class Mapper {
     }
 
     private void assignColorsAndHues() {
+        userColor = new HashMap<>();
         for (int i = 0; i < users.size(); i++) {
             User user = users.get(i);
             int index = i % colors.length;
             user.setColor(colors[index]);
             user.setHue(hues[index]);
+            userColor.put((int) user.getId(), colors[index]);
         }
+    }
+
+    public int getColorForUser(User user){
+        return userColor.get((int) user.getId());
     }
 
     public void setEarliestDate() {

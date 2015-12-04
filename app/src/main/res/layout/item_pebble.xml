@@ -2,56 +2,57 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="15dp"
-    android:paddingRight="10dp"
-    android:paddingBottom="15dp"
-    android:paddingLeft="10dp" >
+    android:padding="10dp">
 
-    <ImageView
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+    <com.makeramen.roundedimageview.RoundedImageView xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/ivProfileImage"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="20dp" />
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:paddingRight="10dp"
+        android:scaleType="fitCenter"
+        app:riv_border_color="@color/route_blue"
+        app:riv_border_width="3dp"
+        app:riv_corner_radius="28dp"
+        app:riv_mutate_background="true"
+        app:riv_oval="true" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Name"
         android:id="@+id/tvName"
-        android:layout_alignTop="@+id/ivProfileImage"
-        android:layout_toRightOf="@+id/ivProfileImage"
-        android:layout_toEndOf="@+id/ivProfileImage"
-        android:layout_marginBottom="3dp"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="#444444" />
-
-    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Latitude,Longitude"
-        android:id="@+id/tvGeolocation"
-        android:layout_below="@+id/tvName"
-        android:layout_toRightOf="@+id/ivProfileImage"
+        android:layout_alignTop="@+id/ivProfileImage"
         android:layout_toEndOf="@+id/ivProfileImage"
+        android:layout_toRightOf="@+id/ivProfileImage"
+        android:paddingTop="5dp"
+        android:text="Name"
+        android:textColor="#444444"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tvGeolocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvName"
+        android:layout_toEndOf="@+id/ivProfileImage"
+        android:layout_toRightOf="@+id/ivProfileImage"
+        android:paddingTop="5dp"
+        android:text="Latitude,Longitude"
         android:textColor="#888888"
         android:textSize="14sp" />
 
     <TextView
+        android:id="@+id/tvTimestamp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="RelativeTime"
-        android:id="@+id/tvTimestamp"
-        android:layout_alignTop="@+id/tvName"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/ivProfileImage"
         android:paddingRight="10dp"
-        android:textStyle="italic"
+        android:paddingTop="8dp"
+        android:text="RelativeTime"
+        android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="#4EADFF"
-        android:textSize="12sp" />
+        android:textSize="12sp"
+        android:textStyle="italic" />
 </RelativeLayout>
