@@ -99,7 +99,7 @@ public class MapFragment extends Fragment implements
 
     private void buildPebbleMarker() {
         Bitmap b = BitmapFactory.decodeResource(getResources(), android.R.drawable.radiobutton_off_background);
-        bPebble=Bitmap.createScaledBitmap(b, b.getWidth(), b.getHeight() * 4/5, false);
+        bPebble = Bitmap.createScaledBitmap(b, b.getWidth(), b.getHeight() * 4 / 5, false);
         bPebble = DrawableHelper.addShadow(bPebble, bPebble.getWidth(), bPebble.getHeight(), Color.BLACK, 3, 1, 3);
     }
 
@@ -175,7 +175,7 @@ public class MapFragment extends Fragment implements
         mapper.setUsers(users);
     }
 
-    private void reloadMap(){
+    private void reloadMap() {
         if (mapFragment != null) {
             mapFragment.getMapAsync(new OnMapReadyCallback() {
                 @Override
@@ -197,16 +197,16 @@ public class MapFragment extends Fragment implements
 
         for (User user : mapper.getUsers()) {
             ArrayList<Pebble> pebbles = user.getPebbles();
-            for(int i = 0; i < pebbles.size(); i++){
+            for (int i = 0; i < pebbles.size(); i++) {
                 Pebble pebble = pebbles.get(i);
                 boundBuilder.include(pebble.getLatLng());
 
                 MarkerOptions options = new MarkerOptions();
                 options.position(pebble.getLatLng());
                 options.title(user.getFullName() + "\n" + pebble.getRelativeTimeAgo() + "\n" + pebble.getCoordinate());
-                if(i == pebbles.size() - 1){
+                if (i == pebbles.size() - 1) {
                     options.icon(BitmapDescriptorFactory.defaultMarker(user.getHue()));
-                }else{
+                } else {
                     options.icon(BitmapDescriptorFactory.fromBitmap(bPebble));
                 }
                 map.addMarker(options);
@@ -419,7 +419,7 @@ public class MapFragment extends Fragment implements
     @Override
     public void onRoutingSuccess(ArrayList<Route> routes, int shortestRouteIndex) {
         progressDialog.dismiss();
-        if(routes.isEmpty()){
+        if (routes.isEmpty()) {
             return;
         }
 //        LatLng start = latLngs.get(0);

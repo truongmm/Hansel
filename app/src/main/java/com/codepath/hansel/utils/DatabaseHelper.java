@@ -273,6 +273,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if (cursor.moveToFirst()) {
                 do {
                     User user = User.fromDB(cursor);
+
                     Pebble pebble = Pebble.fromDB(cursor);
                     pebble.setUser(user);
 
