@@ -5,6 +5,8 @@ import android.database.Cursor;
 import com.codepath.hansel.utils.DatabaseHelper;
 import com.directions.route.Route;
 import com.google.android.gms.maps.model.LatLng;
+import com.parse.ParseClassName;
+import com.parse.ParseObject;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,13 +14,12 @@ import java.util.List;
 
 import static java.lang.Math.sqrt;
 
-/**
- * Created by ryamada on 11/22/15.
- */
-public class User {
-    private int MAX_SAMPLE_POINTS = 3;
+@ParseClassName("User")
+public class User extends ParseObject {
+    final private int MAX_SAMPLE_POINTS = 3;
 
-    private long id;
+    private int id;
+    private String parseId;
     private String firstName;
     private String lastName;
     private String imageUrl;
@@ -28,22 +29,26 @@ public class User {
     private float hue;
 
     public User() {
+        super();
     }
 
     public User(String firstName, String lastName, String imageUrl) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.imageUrl = imageUrl;
+        super();
+
+        setFirstName(firstName);
+        setLastName(lastName);
+        setImageUrl(imageUrl);
     }
 
     public static User fromDB(Cursor cursor) {
         User user = new User();
 
         try {
-            user.id = cursor.getLong(cursor.getColumnIndex(DatabaseHelper.KEY_USER_ID));
-            user.firstName = cursor.getString(cursor.getColumnIndex(DatabaseHelper.KEY_USER_FIRST_NAME));
-            user.lastName = cursor.getString(cursor.getColumnIndex(DatabaseHelper.KEY_USER_LAST_NAME));
-            user.imageUrl = cursor.getString(cursor.getColumnIndex(DatabaseHelper.KEY_USER_IMAGE_URL));
+            user.id = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.KEY_USER_ID));
+            user.parseId = cursor.getString(cursor.getColumnIndex(DatabaseHelper.KEY_USER_PARSE_ID));
+            user.setFirstName(cursor.getString(cursor.getColumnIndex(DatabaseHelper.KEY_USER_FIRST_NAME)));
+            user.setLastName(cursor.getString(cursor.getColumnIndex(DatabaseHelper.KEY_USER_LAST_NAME)));
+            user.setImageUrl(cursor.getString(cursor.getColumnIndex(DatabaseHelper.KEY_USER_IMAGE_URL)));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -55,24 +60,39 @@ public class User {
         return String.valueOf(id);
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
     public String getFirstName() {
-        return firstName;
+        return getString("first_name");
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+        put("first_name", firstName);
     }
 
     public String getLastName() {
-        return lastName;
+        return getString("last_name");
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+        put("last_name", lastName);
     }
 
     public String getFullName() {
-        return firstName + " " + lastName;
+        return getFirstName() + " " + getLastName();
     }
 
     public String getImageUrl() {
-        return imageUrl;
+        return getString("image_url");
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+        put("image_url", imageUrl);
     }
 
     public ArrayList<Pebble> getPebbles() {
