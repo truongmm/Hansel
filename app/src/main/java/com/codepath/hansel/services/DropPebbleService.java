@@ -18,6 +18,9 @@ import com.codepath.hansel.models.Pebble;
 import com.codepath.hansel.models.User;
 import com.codepath.hansel.utils.DatabaseHelper;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class DropPebbleService extends Service implements LocationListener {
 
     private DatabaseHelper dbHelper;
@@ -39,7 +42,10 @@ public class DropPebbleService extends Service implements LocationListener {
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 4000, 0, this);
 
         if (currentLocation != null) {
-            dbHelper.addPebble(new Pebble(currentUser, currentLocation.getLatitude(), currentLocation.getLongitude()));
+            String currentTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+            Pebble pebble = new Pebble(currentUser, currentLocation.getLatitude(), currentLocation.getLongitude(), currentTime);
+            pebble.setUser(currentUser);
+            dbHelper.addPebble(pebble, false);
             showToast("Pebble dropped: " + currentLocation.getLatitude() + ", " + currentLocation.getLongitude());
         }
         return super.onStartCommand(intent, flags, startId);

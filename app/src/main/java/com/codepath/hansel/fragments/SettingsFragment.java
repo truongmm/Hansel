@@ -15,11 +15,18 @@ import android.widget.Toast;
 
 import com.codepath.hansel.R;
 import com.codepath.hansel.activities.MainActivity;
+import com.codepath.hansel.models.User;
+import com.codepath.hansel.utils.DatabaseHelper;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class SettingsFragment extends DialogFragment {
-    final String[] VALID_USERS = {"Ray", "Melody", "Calvin"};
+    HashMap<String,Integer> userNamesAndIds;
     final String[] VALID_PEBBLE_DROP_INTERVALS = {"15 secs", "30 secs", "1 min", "5 mins", "15 mins"};
 
+    DatabaseHelper dbHelper;
     SharedPreferences sharedPreferences;
     Switch swtchTracking;
     Spinner spnrUserId;
@@ -32,6 +39,7 @@ public class SettingsFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        dbHelper = DatabaseHelper.getInstance(getActivity());
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
     }
 
@@ -50,9 +58,11 @@ public class SettingsFragment extends DialogFragment {
         swtchTracking.setChecked(sharedPreferences.getBoolean("enable_tracking", false));
 
         spnrUserId = (Spinner) view.findViewById(R.id.spnrUserId);
-        ArrayAdapter<String> userIdAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, VALID_USERS);
+        userNamesAndIds = getUsersInfo();
+        List<String> userNames = new ArrayList<>(userNamesAndIds.keySet());
+        ArrayAdapter<String> userIdAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, userNames);
         spnrUserId.setAdapter(userIdAdapter);
-        spnrUserId.setSelection(getSavedUserId());
+        spnrUserId.setSelection(getSelectedUserPosition());
 
         spnrPebbleDropInterval = (Spinner) view.findViewById(R.id.spnrPebbleDropInterval);
         ArrayAdapter<String> pebbleDropIntervalAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, VALID_PEBBLE_DROP_INTERVALS);
@@ -69,24 +79,20 @@ public class SettingsFragment extends DialogFragment {
         });
     }
 
-    private int getSelectedUserId() {
-        int userId = 1;
-        switch (spnrUserId.getSelectedItem().toString()) {
-            case "Ray":
-                userId = 1;
-                break;
-            case "Melody":
-                userId = 2;
-                break;
-            case "Calvin":
-                userId = 3;
-                break;
-        }
-        return userId;
+    public HashMap<String,Integer> getUsersInfo() {
+        HashMap<String,Integer> userNamesAndIds = new HashMap<>();
+        for (User user: dbHelper.getAllUsers())
+            userNamesAndIds.put(user.getFirstName(), user.getId());
+        return userNamesAndIds;
     }
 
-    private int getSavedUserId() {
-        return sharedPreferences.getInt("user_id", 1) - 1;
+    private int getSelectedUserId() {
+        return userNamesAndIds.get(spnrUserId.getSelectedItem().toString());
+    }
+
+    private int getSelectedUserPosition() {
+        List<Integer> userIds = new ArrayList<>(userNamesAndIds.values());
+        return userIds.indexOf(sharedPreferences.getInt("user_id", 1));
     }
 
     private int getSelectedPebbleDropInterval() {

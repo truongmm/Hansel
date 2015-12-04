@@ -27,6 +27,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Users Table Columns
     public static final String KEY_USER_ID = "id";
+    public static final String KEY_USER_PARSE_ID = "parseId";
     public static final String KEY_USER_FIRST_NAME = "firstName";
     public static final String KEY_USER_LAST_NAME = "lastName";
     public static final String KEY_USER_IMAGE_URL = "imageUrl";
@@ -73,6 +74,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String CREATE_USERS_TABLE = "CREATE TABLE " + TABLE_USERS +
                 "(" +
                 KEY_USER_ID + " INTEGER PRIMARY KEY," +
+                KEY_USER_PARSE_ID + " TEXT," +
                 KEY_USER_FIRST_NAME + " TEXT," +
                 KEY_USER_LAST_NAME + " TEXT," +
                 KEY_USER_IMAGE_URL + " TEXT," +
@@ -105,19 +107,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public long addPebble(Pebble pebble) {
+    public long addPebble(Pebble pebble, boolean isParsePebble) {
         SQLiteDatabase db = getWritableDatabase();
         long pebbleId = -1;
-        String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         db.beginTransaction();
         try {
             ContentValues values = new ContentValues();
-            values.put(KEY_PEBBLE_USER_ID_FK, pebble.getUser().getId());
+
+            if (isParsePebble) {
+                // Fetch user from SQL DB with parse id
+                User user = getUser(pebble.getUser().getObjectId());
+                values.put(KEY_PEBBLE_USER_ID_FK, user.getId());
+            }
+            else
+                values.put(KEY_PEBBLE_USER_ID_FK, pebble.getUser().getId());
+
             values.put(KEY_PEBBLE_LATITUDE, pebble.getLatitude());
             values.put(KEY_PEBBLE_LONGITUDE, pebble.getLongitude());
-            values.put(KEY_PEBBLE_TIMESTAMP, dateTime);
-            values.put(KEY_PEBBLE_CREATED_AT, dateTime);
-            values.put(KEY_PEBBLE_UPDATED_AT, dateTime);
+            values.put(KEY_PEBBLE_TIMESTAMP, pebble.getTimestamp());
+            values.put(KEY_PEBBLE_CREATED_AT, pebble.getTimestamp());
+            values.put(KEY_PEBBLE_UPDATED_AT, pebble.getTimestamp());
 
             pebbleId = db.insertOrThrow(TABLE_PEBBLES, null, values);
             db.setTransactionSuccessful();
@@ -129,28 +138,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return pebbleId;
     }
 
-    public long addPebble(Pebble pebble, Date date) {
-        SQLiteDatabase db = getWritableDatabase();
-        long pebbleId = -1;
-        String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
-        db.beginTransaction();
+    public User getUser(String parseId) {
+        SQLiteDatabase db = getReadableDatabase();
+        User user = null;
+        Cursor cursor = db.query(TABLE_USERS, new String[]{"*"}, KEY_USER_PARSE_ID + " = ?", new String[]{String.valueOf(parseId)}, null, null, null, "1");
         try {
-            ContentValues values = new ContentValues();
-            values.put(KEY_PEBBLE_USER_ID_FK, pebble.getUser().getId());
-            values.put(KEY_PEBBLE_LATITUDE, pebble.getLatitude());
-            values.put(KEY_PEBBLE_LONGITUDE, pebble.getLongitude());
-            values.put(KEY_PEBBLE_TIMESTAMP, dateTime);
-            values.put(KEY_PEBBLE_CREATED_AT, dateTime);
-            values.put(KEY_PEBBLE_UPDATED_AT, dateTime);
-
-            pebbleId = db.insertOrThrow(TABLE_PEBBLES, null, values);
-            db.setTransactionSuccessful();
+            if (cursor.moveToFirst()) {
+                user = User.fromDB(cursor);
+            }
         } catch (Exception e) {
-            Log.d(TAG, "Error while trying to add pebble to database");
+            Log.d(TAG, "Error while trying to get user from database");
         } finally {
-            db.endTransaction();
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
         }
-        return pebbleId;
+        return user;
     }
 
     public User getUser(long id) {
@@ -162,7 +165,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 user = User.fromDB(cursor);
             }
         } catch (Exception e) {
-            Log.d(TAG, "Error while trying to get pebbles from database");
+            Log.d(TAG, "Error while trying to get user from database");
         } finally {
             if (cursor != null && !cursor.isClosed()) {
                 cursor.close();
@@ -199,6 +202,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.beginTransaction();
         try {
             ContentValues values = new ContentValues();
+            values.put(KEY_USER_PARSE_ID, user.getObjectId());
             values.put(KEY_USER_FIRST_NAME, user.getFirstName());
             values.put(KEY_USER_LAST_NAME, user.getLastName());
             values.put(KEY_USER_IMAGE_URL, user.getImageUrl());
@@ -262,9 +266,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             params.addAll(Arrays.asList(TABLE_PEBBLES, KEY_PEBBLE_TIMESTAMP, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date)));
         }
 
-        if (desc) {
-            query += " ORDER BY timestamp DESC";
-        }
+        query += " ORDER BY timestamp";
+
+        if (desc)
+            query += " DESC";
+        else
+            query += " ASC";
 
         String PEBBLES_SELECT_QUERY = String.format(query, params.toArray());
         SQLiteDatabase db = getReadableDatabase();
@@ -290,15 +297,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return pebbles;
     }
 
-    public void deleteAllTables() {
+    public boolean isUsersTableEmpty() {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            Cursor cursor = db.query(TABLE_USERS, new String[]{"*"}, null, null, null, null, null);
+            return !cursor.moveToFirst();
+        } catch (Exception e) {
+            Log.d(TAG, "Error while trying to fetch users count");
+        } finally {
+            db.endTransaction();
+        }
+        return false;
+    }
+
+    public void clearAllPebbles() {
         SQLiteDatabase db = getWritableDatabase();
         db.beginTransaction();
         try {
             db.delete(TABLE_PEBBLES, null, null);
-            db.delete(TABLE_USERS, null, null);
             db.setTransactionSuccessful();
         } catch (Exception e) {
-            Log.d(TAG, "Error while trying to delete all pebbles and users");
+            Log.d(TAG, "Error while trying to delete all pebbles");
         } finally {
             db.endTransaction();
         }
