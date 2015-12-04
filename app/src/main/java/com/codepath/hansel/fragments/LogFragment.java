@@ -6,6 +6,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -34,10 +35,24 @@ public abstract class LogFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         dbHelper = DatabaseHelper.getInstance(getActivity());
         pebbles = new ArrayList<>();
         aPebbles = new LogAdapter(getActivity(), pebbles);
         loadPebbles();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.refresh:
+                swipeContainer.setRefreshing(true);
+                loadPebbles();
+                swipeContainer.setRefreshing(false);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     public abstract void loadPebbles();

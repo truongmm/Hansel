@@ -5,6 +5,9 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,6 +15,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
@@ -23,6 +27,7 @@ import com.codepath.hansel.models.Mapper;
 import com.codepath.hansel.models.Pebble;
 import com.codepath.hansel.models.User;
 import com.codepath.hansel.utils.DatabaseHelper;
+import com.codepath.hansel.utils.DrawableHelper;
 import com.codepath.hansel.utils.TimeHelper;
 import com.directions.route.AbstractRouting;
 import com.directions.route.Route;
@@ -66,6 +71,7 @@ public class MapFragment extends Fragment implements
     private LocationRequest mLocationRequest;
     private DatabaseHelper dbHelper;
     private Mapper mapper;
+    private Bitmap bPebble;
     private LatLngBounds.Builder boundBuilder;
     private ArrayList<Polyline> polylines;
     private ProgressDialog progressDialog;
@@ -81,10 +87,20 @@ public class MapFragment extends Fragment implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+
         polylines = new ArrayList<>();
         dbHelper = DatabaseHelper.getInstance(getContext());
         mapper = Mapper.getInstance();
+
+        buildPebbleMarker();
         fetchData();
+    }
+
+    private void buildPebbleMarker() {
+        Bitmap b = BitmapFactory.decodeResource(getResources(), android.R.drawable.radiobutton_off_background);
+        bPebble=Bitmap.createScaledBitmap(b, b.getWidth(), b.getHeight() * 4/5, false);
+        bPebble = DrawableHelper.addShadow(bPebble, bPebble.getWidth(), bPebble.getHeight(), Color.BLACK, 3, 1, 3);
     }
 
     @Override
@@ -103,17 +119,7 @@ public class MapFragment extends Fragment implements
                 seekDate = seekDate(seekBar.getProgress());
 //                Toast.makeText(getActivity(), String.valueOf(), Toast.LENGTH_LONG).show();
                 fetchData();
-                if (mapFragment != null) {
-                    mapFragment.getMapAsync(new OnMapReadyCallback() {
-                        @Override
-                        public void onMapReady(GoogleMap map) {
-                            loadMap(map);
-                            drawRoutes();
-                        }
-                    });
-                } else {
-                    Toast.makeText(getActivity(), "Error - Map Fragment was null!!", Toast.LENGTH_SHORT).show();
-                }
+                reloadMap();
             }
 
             @Override
@@ -138,18 +144,23 @@ public class MapFragment extends Fragment implements
         });
         tvMapRelativeTime = (TextView) view.findViewById(R.id.tvMapRelativeTime);
         mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
-        if (mapFragment != null) {
-            mapFragment.getMapAsync(new OnMapReadyCallback() {
-                @Override
-                public void onMapReady(GoogleMap map) {
-                    loadMap(map);
-                    drawRoutes();
-                }
-            });
-        } else {
-            Toast.makeText(getActivity(), "Error - Map Fragment was null!!", Toast.LENGTH_SHORT).show();
-        }
+        reloadMap();
         return view;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Log.d("OptionsMenu", "option 1 selected from frag 1");
+        switch (item.getItemId()) {
+            case R.id.refresh:
+                seekDate = null;
+                sbMapRelativeTime.setProgress(100);
+                fetchData();
+                reloadMap();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private void fetchData() {
@@ -164,11 +175,26 @@ public class MapFragment extends Fragment implements
         mapper.setUsers(users);
     }
 
+    private void reloadMap(){
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(new OnMapReadyCallback() {
+                @Override
+                public void onMapReady(GoogleMap map) {
+                    loadMap(map);
+                    drawRoutes();
+                }
+            });
+        } else {
+            Toast.makeText(getActivity(), "Error - Map Fragment was null!!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void drawRoutes() {
         progressDialog = ProgressDialog.show(getActivity(), "Please wait.",
                 "Fetching route information.", true);
         boundBuilder = new LatLngBounds.Builder();
         boolean noRoute = true;
+
         for (User user : mapper.getUsers()) {
             ArrayList<Pebble> pebbles = user.getPebbles();
             for(int i = 0; i < pebbles.size(); i++){
@@ -181,7 +207,7 @@ public class MapFragment extends Fragment implements
                 if(i == pebbles.size() - 1){
                     options.icon(BitmapDescriptorFactory.defaultMarker(user.getHue()));
                 }else{
-                    options.icon(BitmapDescriptorFactory.fromResource(R.drawable.pebble));
+                    options.icon(BitmapDescriptorFactory.fromBitmap(bPebble));
                 }
                 map.addMarker(options);
             }
@@ -393,6 +419,9 @@ public class MapFragment extends Fragment implements
     @Override
     public void onRoutingSuccess(ArrayList<Route> routes, int shortestRouteIndex) {
         progressDialog.dismiss();
+        if(routes.isEmpty()){
+            return;
+        }
 //        LatLng start = latLngs.get(0);
 //        LatLng end = latLngs.get(latLngs.size() - 1);
 //        CameraUpdate center = CameraUpdateFactory.newLatLng(start);
