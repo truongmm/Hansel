@@ -23,15 +23,17 @@ public class Pebble extends ParseObject {
     private double longitude;
     private LatLng latLng;
     private String timestamp;
+    private String status;
 
     public Pebble() {
         super();
     }
 
-    public Pebble(User user, double latitude, double longitude, String timestamp) {
+    public Pebble(User user, double latitude, double longitude, String timestamp, String status) {
         super();
 
         this.latLng = new LatLng(latitude, longitude);
+        this.status = status;
 
         setUser(user);
         setLatitude(latitude);
@@ -49,6 +51,7 @@ public class Pebble extends ParseObject {
             pebble.setLatitude(cursor.getDouble(cursor.getColumnIndex(DatabaseHelper.KEY_PEBBLE_LATITUDE)));
             pebble.setLongitude(cursor.getDouble(cursor.getColumnIndex(DatabaseHelper.KEY_PEBBLE_LONGITUDE)));
             pebble.latLng = new LatLng(pebble.latitude, pebble.longitude);
+            pebble.status = cursor.getString(cursor.getColumnIndex(DatabaseHelper.KEY_PEBBLE_STATUS));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -124,5 +127,13 @@ public class Pebble extends ParseObject {
 
     public String getRelativeTimeAgo(){
         return TimeHelper.getRelativeTimeAgo(date);
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

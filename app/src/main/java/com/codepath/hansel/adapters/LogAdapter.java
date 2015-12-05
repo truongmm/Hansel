@@ -1,6 +1,8 @@
 package com.codepath.hansel.adapters;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +24,7 @@ public class LogAdapter extends ArrayAdapter<Pebble> {
         TextView tvName;
         TextView tvGeolocation;
         TextView tvTimestamp;
+        TextView tvStatus;
     }
 
     public LogAdapter(Context context, List<Pebble> pebbles) {
@@ -40,6 +43,7 @@ public class LogAdapter extends ArrayAdapter<Pebble> {
             viewHolder.tvName = (TextView) convertView.findViewById(R.id.tvName);
             viewHolder.tvGeolocation = (TextView) convertView.findViewById(R.id.tvGeolocation);
             viewHolder.tvTimestamp = (TextView) convertView.findViewById(R.id.tvTimestamp);
+            viewHolder.tvStatus = (TextView) convertView.findViewById(R.id.tvStatus);
             convertView.setTag(viewHolder);
         }
         else
@@ -54,6 +58,12 @@ public class LogAdapter extends ArrayAdapter<Pebble> {
         viewHolder.tvName.setText(pebble.getUser().getFullName());
         viewHolder.tvGeolocation.setText(pebble.getCoordinate());
         viewHolder.tvTimestamp.setText(pebble.getRelativeTimeAgo());
+        if (pebble.getStatus() != null && pebble.getStatus().equals("pending")) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+            int currentUserId = sharedPreferences.getInt("user_id", 1);
+            if (currentUserId == pebble.getUser().getId())
+                viewHolder.tvStatus.setText(pebble.getStatus() + "...");
+        }
 
         return convertView;
     }

@@ -51,22 +51,22 @@ public class HanselApplication extends Application {
             }
         });
 
-        Pebble p1 = new Pebble(ray, 37.425105, -122.136588, getDate(new Date(System.currentTimeMillis() - 3600 * 1000)));
-        Pebble p2 = new Pebble(ray, 37.423725, -122.134335, getDate(new Date(System.currentTimeMillis() - 2700 * 1000)));
-        Pebble p3 = new Pebble(ray, 37.419652, -122.135054, getDate(new Date(System.currentTimeMillis() - 1300 * 1000)));
-        Pebble p4 = new Pebble(ray, 37.417240, -122.130484, getDate(new Date(System.currentTimeMillis() - 500 * 1000)));
-        Pebble p5 = new Pebble(ray, 37.414479, -122.126450, getDate(new Date(System.currentTimeMillis() - 20 * 1000)));
+        Pebble p1 = new Pebble(ray, 37.425105, -122.136588, getDate(new Date(System.currentTimeMillis() - 3600 * 1000)), "sent");
+        Pebble p2 = new Pebble(ray, 37.423725, -122.134335, getDate(new Date(System.currentTimeMillis() - 2700 * 1000)), "sent");
+        Pebble p3 = new Pebble(ray, 37.419652, -122.135054, getDate(new Date(System.currentTimeMillis() - 1300 * 1000)), "sent");
+        Pebble p4 = new Pebble(ray, 37.417240, -122.130484, getDate(new Date(System.currentTimeMillis() - 500 * 1000)), "sent");
+        Pebble p5 = new Pebble(ray, 37.414479, -122.126450, getDate(new Date(System.currentTimeMillis() - 20 * 1000)), "sent");
 
-        Pebble p6 = new Pebble(melody, 37.424977, -122.136441, getDate(new Date(System.currentTimeMillis() - 3550 * 1000)));
-        Pebble p7 = new Pebble(melody, 37.428351, -122.143050, getDate(new Date(System.currentTimeMillis() - 2640 * 1000)));
-        Pebble p8 = new Pebble(melody, 37.424406, -122.144155, getDate(new Date(System.currentTimeMillis() - 1250 * 1000)));
-        Pebble p9 = new Pebble(melody, 37.430055, -122.135000, getDate(new Date(System.currentTimeMillis() - 400 * 1000)));
-        Pebble p10 = new Pebble(melody, 37.426255, -122.134657, getDate(new Date(System.currentTimeMillis() - 10 * 1000)));
+        Pebble p6 = new Pebble(melody, 37.424977, -122.136441, getDate(new Date(System.currentTimeMillis() - 3550 * 1000)), "sent");
+        Pebble p7 = new Pebble(melody, 37.428351, -122.143050, getDate(new Date(System.currentTimeMillis() - 2640 * 1000)), "sent");
+        Pebble p8 = new Pebble(melody, 37.424406, -122.144155, getDate(new Date(System.currentTimeMillis() - 1250 * 1000)), "sent");
+        Pebble p9 = new Pebble(melody, 37.430055, -122.135000, getDate(new Date(System.currentTimeMillis() - 400 * 1000)), "sent");
+        Pebble p10 = new Pebble(melody, 37.426255, -122.134657, getDate(new Date(System.currentTimeMillis() - 10 * 1000)), "sent");
 
-        Pebble p11 = new Pebble(calvin, 37.425005, -122.136841, getDate(new Date(System.currentTimeMillis() - 3250 * 1000)));
-        Pebble p12 = new Pebble(calvin, 37.426655, -122.150271, getDate(new Date(System.currentTimeMillis() - 2500 * 1000)));
-        Pebble p13 = new Pebble(calvin, 37.420619, -122.149583, getDate(new Date(System.currentTimeMillis() - 1400 * 1000)));
-        Pebble p14 = new Pebble(calvin, 37.411322, -122.139422, getDate(new Date(System.currentTimeMillis() - 30 * 1000)));
+        Pebble p11 = new Pebble(calvin, 37.425005, -122.136841, getDate(new Date(System.currentTimeMillis() - 3250 * 1000)), "sent");
+        Pebble p12 = new Pebble(calvin, 37.426655, -122.150271, getDate(new Date(System.currentTimeMillis() - 2500 * 1000)), "sent");
+        Pebble p13 = new Pebble(calvin, 37.420619, -122.149583, getDate(new Date(System.currentTimeMillis() - 1400 * 1000)), "sent");
+        Pebble p14 = new Pebble(calvin, 37.411322, -122.139422, getDate(new Date(System.currentTimeMillis() - 30 * 1000)), "sent");
 
         List<Pebble> pebbles = new ArrayList<>();
         pebbles.add(p1);
