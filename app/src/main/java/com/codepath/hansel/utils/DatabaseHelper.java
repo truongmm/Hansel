@@ -43,6 +43,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String KEY_PEBBLE_LONGITUDE = "longitude";
     private static final String KEY_PEBBLE_CREATED_AT = "createdAt";
     private static final String KEY_PEBBLE_UPDATED_AT = "updatedAt";
+    public static final String KEY_PEBBLE_STATUS = "status";
     // https://stackoverflow.com/questions/9701616/how-to-insert-double-and-float-values-to-sqlite
 
     private static DatabaseHelper instance;
@@ -90,7 +91,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 KEY_PEBBLE_LATITUDE + " REAL," +
                 KEY_PEBBLE_LONGITUDE + " REAL," +
                 KEY_PEBBLE_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
-                KEY_PEBBLE_UPDATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP" +
+                KEY_PEBBLE_UPDATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
+                KEY_PEBBLE_STATUS + " TEXT DEFAULT 'pending'" +
                 ")";
 
         db.execSQL(CREATE_USERS_TABLE);
@@ -127,6 +129,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(KEY_PEBBLE_TIMESTAMP, pebble.getTimestamp());
             values.put(KEY_PEBBLE_CREATED_AT, pebble.getTimestamp());
             values.put(KEY_PEBBLE_UPDATED_AT, pebble.getTimestamp());
+            values.put(KEY_PEBBLE_STATUS, pebble.getStatus());
 
             pebbleId = db.insertOrThrow(TABLE_PEBBLES, null, values);
             db.setTransactionSuccessful();

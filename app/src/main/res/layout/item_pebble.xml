@@ -55,4 +55,16 @@
         android:textColor="#4EADFF"
         android:textSize="12sp"
         android:textStyle="italic" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvStatus"
+        android:layout_alignBottom="@+id/tvGeolocation"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:paddingRight="10dp"
+        android:textColor="#CCA300"
+        android:textSize="11sp"
+        android:textAllCaps="true" />
 </RelativeLayout>

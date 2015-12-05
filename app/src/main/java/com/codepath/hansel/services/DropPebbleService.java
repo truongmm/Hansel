@@ -43,10 +43,10 @@ public class DropPebbleService extends Service implements LocationListener {
 
         if (currentLocation != null) {
             String currentTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-            Pebble pebble = new Pebble(currentUser, currentLocation.getLatitude(), currentLocation.getLongitude(), currentTime);
+            Pebble pebble = new Pebble(currentUser, currentLocation.getLatitude(), currentLocation.getLongitude(), currentTime, "pending");
             pebble.setUser(currentUser);
             dbHelper.addPebble(pebble, false);
-            showToast("Pebble dropped: " + currentLocation.getLatitude() + ", " + currentLocation.getLongitude());
+            showToast("Pebble dropped: " + pebble.getCoordinate());
         }
         return super.onStartCommand(intent, flags, startId);
     }
