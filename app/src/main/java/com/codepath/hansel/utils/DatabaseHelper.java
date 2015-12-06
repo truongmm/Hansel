@@ -279,8 +279,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String PEBBLES_SELECT_QUERY = String.format(query, params.toArray());
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery(PEBBLES_SELECT_QUERY, null);
+        boolean cursorMoveToFirst = cursor.moveToFirst();
         try {
-            if (cursor.moveToFirst()) {
+            if (cursorMoveToFirst) {
                 do {
                     User user = User.fromDB(cursor);
 
@@ -314,6 +315,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return false;
     }
 
+    public boolean isPebblesTableEmpty() {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            Cursor cursor = db.query(TABLE_PEBBLES, new String[]{"*"}, null, null, null, null, null);
+            return !cursor.moveToFirst();
+        } catch (Exception e) {
+            Log.d(TAG, "Error while trying to fetch pebbles count");
+        } finally {
+            db.endTransaction();
+        }
+        return false;
+    }
+
     public void clearAllPebbles() {
         SQLiteDatabase db = getWritableDatabase();
         db.beginTransaction();
@@ -325,5 +340,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             db.endTransaction();
         }
+    }
+
+    public String getLatestPebbleTimestamp() {
+        boolean isPebblesTableEmpty = isPebblesTableEmpty();
+        if (isPebblesTableEmpty)
+            return "";
+
+        String query = "SELECT * FROM " + TABLE_PEBBLES + " ORDER BY timestamp DESC";
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        Cursor cursor = db.rawQuery(query, null);
+        String timestamp = "";
+        try {
+            if (cursor.moveToFirst()) {
+                Pebble pebble = Pebble.fromDB(cursor);
+                timestamp = pebble.getTimestamp();
+            }
+        } catch (Exception e) {
+            Log.d(TAG, "Error while trying to get latest pebble timestamp from database");
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+        }
+        return timestamp;
     }
 }

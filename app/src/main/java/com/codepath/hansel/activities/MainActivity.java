@@ -16,6 +16,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -68,7 +69,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadUsers() {
-        if (!dbHelper.isUsersTableEmpty())
+        boolean isUsersTableEmpty = dbHelper.isUsersTableEmpty();
+        if (!isUsersTableEmpty)
             return;
 
         ParseQuery<User> query = ParseQuery.getQuery(User.class);
@@ -82,18 +84,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadPebbles() {
-        dbHelper.clearAllPebbles();
         pebbles = new ArrayList<>();
 
-        ParseQuery<Pebble> query = ParseQuery.getQuery(Pebble.class);
+        List<Pebble> dbPebbles = dbHelper.getAllPebbles();
+        String latestTimestamp = dbHelper.getLatestPebbleTimestamp();
+        ParseQuery query = new ParseQuery("Pebble");
+        query.whereGreaterThan("timestamp", latestTimestamp);
         try {
             List<Pebble> parsePebbles = query.find();
             for (Pebble parsePebble : parsePebbles)
                 dbHelper.addPebble(parsePebble, true);
+            dbPebbles = dbHelper.getAllPebbles();
             pebbles.addAll(dbHelper.getAllPebbles());
         } catch (ParseException e) {
             e.printStackTrace();
         }
+
+        latestTimestamp = dbHelper.getLatestPebbleTimestamp();
+        Log.d("timestamp", latestTimestamp);
     }
 
     private void constructMapper() {
