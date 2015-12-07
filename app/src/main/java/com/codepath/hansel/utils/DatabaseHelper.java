@@ -92,7 +92,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 KEY_PEBBLE_LONGITUDE + " REAL," +
                 KEY_PEBBLE_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
                 KEY_PEBBLE_UPDATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
-                KEY_PEBBLE_STATUS + " TEXT DEFAULT 'pending'" +
+                KEY_PEBBLE_STATUS + " TEXT" +
                 ")";
 
         db.execSQL(CREATE_USERS_TABLE);
@@ -129,7 +129,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(KEY_PEBBLE_TIMESTAMP, pebble.getTimestamp());
             values.put(KEY_PEBBLE_CREATED_AT, pebble.getTimestamp());
             values.put(KEY_PEBBLE_UPDATED_AT, pebble.getTimestamp());
-            values.put(KEY_PEBBLE_STATUS, pebble.getStatus());
+            if (pebble.getStatus() != null)
+               values.put(KEY_PEBBLE_STATUS, pebble.getStatus());
 
             pebbleId = db.insertOrThrow(TABLE_PEBBLES, null, values);
             db.setTransactionSuccessful();
@@ -148,6 +149,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             if (cursor.moveToFirst()) {
                 user = User.fromDB(cursor);
+                user.setObjectId(parseId);
             }
         } catch (Exception e) {
             Log.d(TAG, "Error while trying to get user from database");
@@ -209,8 +211,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(KEY_USER_FIRST_NAME, user.getFirstName());
             values.put(KEY_USER_LAST_NAME, user.getLastName());
             values.put(KEY_USER_IMAGE_URL, user.getImageUrl());
-            values.put(KEY_PEBBLE_CREATED_AT, dateTime);
-            values.put(KEY_PEBBLE_UPDATED_AT, dateTime);
+            values.put(KEY_USER_CREATED_AT, dateTime);
+            values.put(KEY_USER_UPDATED_AT, dateTime);
 
             int rows = db.update(TABLE_USERS, values, KEY_USER_ID + "= ?", new String[]{String.valueOf(user.getId())});
 
@@ -228,27 +230,66 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return userId;
     }
 
+    public long updatePebbleStatus(Pebble pebble) {
+        pebble.setStatus("sent");
+        SQLiteDatabase db = getWritableDatabase();
+        long pebbleId = -1;
+        db.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(KEY_PEBBLE_ID, pebble.getId());
+            values.put(KEY_PEBBLE_USER_ID_FK, pebble.getUser().getId());
+            values.put(KEY_PEBBLE_LATITUDE, pebble.getLatitude());
+            values.put(KEY_PEBBLE_LONGITUDE, pebble.getLongitude());
+            values.put(KEY_PEBBLE_TIMESTAMP, pebble.getTimestamp());
+            values.put(KEY_PEBBLE_CREATED_AT, pebble.getTimestamp());
+            values.put(KEY_PEBBLE_UPDATED_AT, pebble.getTimestamp());
+            values.put(KEY_PEBBLE_STATUS, "sent");
+
+            int rows = db.update(TABLE_PEBBLES, values, KEY_PEBBLE_ID + "= ?", new String[]{String.valueOf(pebble.getId())});
+            if (rows == 1)
+                pebbleId = pebble.getId();
+
+            String query = "SELECT * FROM " + TABLE_PEBBLES + " WHERE id=" + pebble.getId();
+            Cursor cursor = db.rawQuery(query, null);
+            cursor.moveToFirst();
+            Pebble updatedPebble = Pebble.fromDB(cursor);
+            String status = updatedPebble.getStatus();
+
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.d(TAG, "Error while trying to update pebble status");
+        } finally {
+            db.endTransaction();
+        }
+        return pebbleId;
+    }
+
     public ArrayList<Pebble> getAllPebbles(){
-        return getPebbles(null, null, null, false);
+        return getPebbles(null, null, null, false, false);
     }
 
-    public ArrayList<Pebble> getAllPebbles(boolean desc) {
-        return getPebbles(null, null, null, desc);
+    public ArrayList<Pebble> getAllPebbles(boolean desc, boolean onlyPending) {
+        return getPebbles(null, null, null, desc, onlyPending);
     }
 
-    public ArrayList<Pebble> getPebblesForUsers(User[] whiteList, boolean desc) {
-        return getPebbles(whiteList, null, null, desc);
+    public ArrayList<Pebble> getAllPendingPebblesForUsers(User[] whiteList, boolean desc, boolean onlyPending) {
+        return getPebbles(whiteList, null, null, desc, onlyPending);
     }
 
-    public ArrayList<Pebble> getPebblesForUsersBeforeDate(User[] whiteList, Date date, boolean desc){
-        return getPebbles(whiteList, null, date, desc);
+    public ArrayList<Pebble> getPebblesForUsers(User[] whiteList, boolean desc, boolean onlyPending) {
+        return getPebbles(whiteList, null, null, desc, onlyPending);
     }
 
-    public ArrayList<Pebble> getPebblesWithoutUsers(User[] blackList, boolean desc) {
-        return getPebbles(null, blackList, null, desc);
+    public ArrayList<Pebble> getPebblesForUsersBeforeDate(User[] whiteList, Date date, boolean desc, boolean onlyPending){
+        return getPebbles(whiteList, null, date, desc, onlyPending);
     }
 
-    public ArrayList<Pebble> getPebbles(User[] whiteList, User[] blackList, Date date, boolean desc) {
+    public ArrayList<Pebble> getPebblesWithoutUsers(User[] blackList, boolean desc, boolean onlyPending) {
+        return getPebbles(null, blackList, null, desc, onlyPending);
+    }
+
+    public ArrayList<Pebble> getPebbles(User[] whiteList, User[] blackList, Date date, boolean desc, boolean onlyPending) {
         ArrayList<Pebble> pebbles = new ArrayList<>();
         String query = "SELECT * FROM %s LEFT OUTER JOIN %s ON %s.%s = %s.%s WHERE 1 = 1";
         ArrayList<Object> params = new ArrayList<>();
@@ -268,6 +309,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             query += " AND %s.%s <= '%s'";
             params.addAll(Arrays.asList(TABLE_PEBBLES, KEY_PEBBLE_TIMESTAMP, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date)));
         }
+
+        if (onlyPending)
+            query += " AND status = 'pending'";
 
         query += " ORDER BY timestamp";
 

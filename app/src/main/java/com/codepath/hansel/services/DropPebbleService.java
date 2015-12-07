@@ -26,8 +26,8 @@ public class DropPebbleService extends Service implements LocationListener {
 
     private DatabaseHelper dbHelper;
     private LocationManager locationManager;
-    private User currentUser;
     private Location currentLocation;
+    private User currentUser;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)

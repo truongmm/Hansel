@@ -23,6 +23,6 @@ public class FriendsLogFragment extends LogFragment {
 
     public void loadPebbles() {
         aPebbles.clear();
-        aPebbles.addAll(dbHelper.getPebblesWithoutUsers(new User[]{dbHelper.getUser(getCurrentUserId())}, true));
+        aPebbles.addAll(dbHelper.getPebblesWithoutUsers(new User[]{dbHelper.getUser(getCurrentUserId())}, true, false));
     }
 }

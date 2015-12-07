@@ -27,7 +27,6 @@ public class HanselApplication extends Application {
         super.onCreate();
 
         Parse.enableLocalDatastore(getApplicationContext());
-
         ParseObject.registerSubclass(Pebble.class);
         ParseObject.registerSubclass(User.class);
 
