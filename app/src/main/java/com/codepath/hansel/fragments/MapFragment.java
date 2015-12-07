@@ -28,6 +28,7 @@ import com.codepath.hansel.models.Pebble;
 import com.codepath.hansel.models.User;
 import com.codepath.hansel.utils.DatabaseHelper;
 import com.codepath.hansel.utils.DrawableHelper;
+import com.codepath.hansel.utils.MarkerCallback;
 import com.codepath.hansel.utils.TimeHelper;
 import com.directions.route.AbstractRouting;
 import com.directions.route.Route;
@@ -47,12 +48,16 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.makeramen.roundedimageview.RoundedImageView;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class MapFragment extends Fragment implements
@@ -73,6 +78,7 @@ public class MapFragment extends Fragment implements
     private Mapper mapper;
     private Bitmap bPebble;
     private LatLngBounds.Builder boundBuilder;
+    private HashMap<Marker, Pebble> markerPebbleMap;
     private ArrayList<Polyline> polylines;
     private ProgressDialog progressDialog;
     private long UPDATE_INTERVAL = 60000;  /* 60 secs */
@@ -89,6 +95,7 @@ public class MapFragment extends Fragment implements
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
+        markerPebbleMap = new HashMap<>();
         polylines = new ArrayList<>();
         dbHelper = DatabaseHelper.getInstance(getContext());
         mapper = Mapper.getInstance();
@@ -144,6 +151,46 @@ public class MapFragment extends Fragment implements
         });
         tvMapRelativeTime = (TextView) view.findViewById(R.id.tvMapRelativeTime);
         mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        GoogleMap googleMap = mapFragment.getMap();
+        googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+            private final View mWindow = getActivity().getLayoutInflater().inflate(R.layout.custom_info_window, null);
+            private final View mContents = getActivity().getLayoutInflater().inflate(R.layout.custom_info_contents, null);
+
+            @Override
+            public View getInfoWindow(Marker marker) {
+                render(marker, mWindow);
+                return mWindow;
+            }
+
+            // Defines the contents of the InfoWindow
+            @Override
+            public View getInfoContents(Marker marker) {
+                render(marker, mContents);
+                return mContents;
+            }
+
+            private void render(Marker marker, View view) {
+                Pebble pebble = markerPebbleMap.get(marker);
+                RoundedImageView ivProfileImage = (RoundedImageView) view.findViewById(R.id.ivProfileImage);
+
+                Picasso.with(getContext())
+                        .load(pebble.getUserImageUrl())
+                        .placeholder(R.mipmap.ic_default_profile)
+                        .into(ivProfileImage, new MarkerCallback(marker));
+
+                int color = Mapper.getInstance().getColorForUser(pebble.getUser());
+                ivProfileImage.setBorderColor(getContext().getResources().getColor(color));
+
+                TextView tvName = (TextView) view.findViewById(R.id.tvName);
+                tvName.setText(pebble.getUser().getFullName());
+
+                TextView tvGeolocation = (TextView) view.findViewById(R.id.tvGeolocation);
+                tvGeolocation.setText(pebble.getCoordinate());
+
+                TextView tvTimestamp = (TextView) view.findViewById(R.id.tvTimestamp);
+                tvTimestamp.setText(pebble.getRelativeTimeAgo());
+            }
+        });
         reloadMap();
         return view;
     }
@@ -203,13 +250,15 @@ public class MapFragment extends Fragment implements
 
                 MarkerOptions options = new MarkerOptions();
                 options.position(pebble.getLatLng());
-                options.title(user.getFullName() + "\n" + pebble.getRelativeTimeAgo() + "\n" + pebble.getCoordinate());
+
                 if (i == pebbles.size() - 1) {
                     options.icon(BitmapDescriptorFactory.defaultMarker(user.getHue()));
                 } else {
                     options.icon(BitmapDescriptorFactory.fromBitmap(bPebble));
                 }
-                map.addMarker(options);
+
+                Marker marker = map.addMarker(options);
+                markerPebbleMap.put(marker, pebble);
             }
 
             ArrayList<LatLng> latLngs = user.getLatLngs();
