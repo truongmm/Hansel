@@ -28,9 +28,11 @@ import com.codepath.hansel.models.Mapper;
 import com.codepath.hansel.models.Pebble;
 import com.codepath.hansel.models.User;
 import com.codepath.hansel.receivers.DropPebbleReceiver;
+import com.codepath.hansel.receivers.FetchPebblesReceiver;
 import com.codepath.hansel.receivers.SendPebblesReceiver;
 import com.codepath.hansel.utils.DatabaseHelper;
 import com.parse.ParseException;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 import java.util.ArrayList;
@@ -64,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadDatabase() {
         dbHelper = DatabaseHelper.getInstance(MainActivity.this);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         loadUsers();
         loadPebbles();
     }
@@ -84,8 +87,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadPebbles() {
         pebbles = new ArrayList<>();
+        User currentUser = dbHelper.getUser(sharedPreferences.getInt("user_id", 1));
+        ParseObject parseUser = ParseObject.createWithoutData("User", currentUser.getParseId());
+        String latestTimestamp = dbHelper.getLatestPebbleTimestamp(new User[]{currentUser});
 
-        String latestTimestamp = dbHelper.getLatestPebbleTimestamp();
         ParseQuery query = new ParseQuery("Pebble");
         query.whereGreaterThan("timestamp", latestTimestamp);
         try {
@@ -93,9 +98,11 @@ public class MainActivity extends AppCompatActivity {
             for (Pebble parsePebble : parsePebbles)
                 dbHelper.addPebble(parsePebble, true);
             pebbles.addAll(dbHelper.getAllPebbles());
+            Toast.makeText(MainActivity.this, "Pebbles fetched", Toast.LENGTH_SHORT).show();
         } catch (ParseException e) {
             e.printStackTrace();
         }
+        schedulePebblesFetching();
     }
 
     private void constructMapper() {
@@ -210,8 +217,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void restoreSharedPreferences() {
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-
         if (sharedPreferences.getBoolean("enable_tracking", false)) {
             schedulePebbleDrops();
             schedulePebblesSending();
@@ -260,5 +265,25 @@ public class MainActivity extends AppCompatActivity {
         AlarmManager sendPebblesAlarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Toast.makeText(MainActivity.this, "Send pebbles service stopped", Toast.LENGTH_SHORT).show();
         sendPebblesAlarm.cancel(pebbleDropIntent);
+    }
+
+    public void schedulePebblesFetching() {
+        Intent intent = new Intent(MainActivity.this, FetchPebblesReceiver.class);
+        final PendingIntent pebbleDropIntent = PendingIntent.getBroadcast(MainActivity.this, FetchPebblesReceiver.REQUEST_CODE,
+                intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        long firstMillis = System.currentTimeMillis(); // alarm is set right away
+        AlarmManager fetchPebblesAlarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        int fetchPebblesInterval = 1000 * sharedPreferences.getInt("fetch_pebbles_interval", 15);
+        Toast.makeText(MainActivity.this, "Fetch pebbles service interval is " + (fetchPebblesInterval / 1000) + " secs", Toast.LENGTH_SHORT).show();
+        fetchPebblesAlarm.setRepeating(AlarmManager.RTC_WAKEUP, firstMillis, fetchPebblesInterval, pebbleDropIntent);
+    }
+
+    public void stopPebblesFetching() {
+        Intent intent = new Intent(MainActivity.this, FetchPebblesReceiver.class);
+        final PendingIntent pebbleDropIntent = PendingIntent.getBroadcast(MainActivity.this, FetchPebblesReceiver.REQUEST_CODE,
+                intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        AlarmManager fetchPebblesAlarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Toast.makeText(MainActivity.this, "Fetch pebbles service stopped", Toast.LENGTH_SHORT).show();
+        fetchPebblesAlarm.cancel(pebbleDropIntent);
     }
 }

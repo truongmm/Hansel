@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     // Database Info
@@ -344,26 +345,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return false;
     }
 
-    public String getLatestPebbleTimestamp() {
-        String query = "SELECT *, " +
-                TABLE_PEBBLES + "." + KEY_PEBBLE_ID + " AS " + KEY_PEBBLE_ID_RENAME +
-                " FROM " + TABLE_PEBBLES + " ORDER BY timestamp DESC";
-        SQLiteDatabase db = getWritableDatabase();
-        db.beginTransaction();
-        Cursor cursor = db.rawQuery(query, null);
+    public String getLatestPebbleTimestamp(User[] whiteList) {
         String timestamp = "";
-        try {
-            if (cursor.moveToFirst()) {
-                Pebble pebble = Pebble.fromDB(cursor);
-                timestamp = pebble.getTimestamp();
-            }
-        } catch (Exception e) {
-            Log.d(TAG, "Error while trying to get latest pebble timestamp from database");
-        } finally {
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
-        }
+        List<Pebble> friendsPebbles = getPebblesWithoutUsers(whiteList, true, false);
+        if (friendsPebbles.size() > 0)
+            timestamp = friendsPebbles.get(0).getTimestamp();
         return timestamp;
     }
 }
