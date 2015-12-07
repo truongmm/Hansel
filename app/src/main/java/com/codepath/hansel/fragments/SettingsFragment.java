@@ -24,7 +24,7 @@ import java.util.List;
 
 public class SettingsFragment extends DialogFragment {
     HashMap<String,Integer> userNamesAndIds;
-    final String[] VALID_PEBBLE_SERVICE_INTERVALS = {"15 secs", "30 secs", "1 min", "5 mins", "15 mins"};
+    final String[] VALID_PEBBLE_SERVICE_INTERVALS = {"5 secs", "15 secs", "30 secs", "1 min", "5 mins", "15 mins"};
 
     DatabaseHelper dbHelper;
     SharedPreferences sharedPreferences;
@@ -32,6 +32,7 @@ public class SettingsFragment extends DialogFragment {
     Spinner spnrUserId;
     Spinner spnrPebbleDropInterval;
     Spinner spnrSendPebblesInterval;
+    Spinner spnrFetchPebblesInterval;
     Button btnSave;
 
     public SettingsFragment() {
@@ -71,6 +72,9 @@ public class SettingsFragment extends DialogFragment {
         spnrSendPebblesInterval = (Spinner) view.findViewById(R.id.spnrSendPebblesInterval);
         setupPebbleServiceSpinner(spnrSendPebblesInterval, "send_pebbles_interval");
 
+        spnrFetchPebblesInterval = (Spinner) view.findViewById(R.id.spnrFetchPebblesInterval);
+        setupPebbleServiceSpinner(spnrFetchPebblesInterval, "fetch_pebbles_interval");
+
         btnSave = (Button) view.findViewById(R.id.btnSave);
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -106,6 +110,9 @@ public class SettingsFragment extends DialogFragment {
     private int getSelectedPebbleServiceInterval(Spinner spinner) {
         int pebbleServiceInterval = 15;
         switch (spinner.getSelectedItem().toString()) {
+            case "5 secs":
+                pebbleServiceInterval = 5;
+                break;
             case "15 secs":
                 pebbleServiceInterval = 15;
                 break;
@@ -129,20 +136,23 @@ public class SettingsFragment extends DialogFragment {
         int pebbleServiceInterval = sharedPreferences.getInt(servicePreferenceName, 15);
         int dropDownPosition = 0;
         switch (pebbleServiceInterval) {
-            case 15:
+            case 5:
                 dropDownPosition = 0;
                 break;
-            case 30:
+            case 15:
                 dropDownPosition = 1;
                 break;
-            case 60:
+            case 30:
                 dropDownPosition = 2;
                 break;
-            case 300:
+            case 60:
                 dropDownPosition = 3;
                 break;
-            case 900:
+            case 300:
                 dropDownPosition = 4;
+                break;
+            case 900:
+                dropDownPosition = 5;
                 break;
         }
         return dropDownPosition;
@@ -153,22 +163,26 @@ public class SettingsFragment extends DialogFragment {
         int userId = getSelectedUserId();
         int pebbleDropInterval = getSelectedPebbleServiceInterval(spnrPebbleDropInterval);
         int sendPebblesInterval = getSelectedPebbleServiceInterval(spnrSendPebblesInterval);
+        int fetchPebblesInterval = getSelectedPebbleServiceInterval(spnrFetchPebblesInterval);
 
         SharedPreferences.Editor preferencesEditor = sharedPreferences.edit();
         preferencesEditor.putBoolean("enable_tracking", enableTracking);
         preferencesEditor.putInt("user_id", userId);
         preferencesEditor.putInt("pebble_drop_interval", pebbleDropInterval);
         preferencesEditor.putInt("send_pebbles_interval", sendPebblesInterval);
+        preferencesEditor.putInt("fetch_pebbles_interval", fetchPebblesInterval);
         preferencesEditor.commit();
 
         MainActivity mainActivity = (MainActivity) getContext();
         if (sharedPreferences.getBoolean("enable_tracking", false)) {
             mainActivity.schedulePebbleDrops();
             mainActivity.schedulePebblesSending();
+            mainActivity.schedulePebblesFetching();
         }
         else {
             mainActivity.stopPebbleDrops();
             mainActivity.stopPebblesSending();
+            mainActivity.stopPebblesFetching();
         }
     }
 }

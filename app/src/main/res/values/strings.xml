@@ -13,4 +13,5 @@
     <string name="active_user_label">Active User</string>
     <string name="save">Save</string>
     <string name="send_pebbles_interval">Send Pebbles Every</string>
+    <string name="fetch_pebbles_interval">Fetch Pebbles Every</string>
 </resources>

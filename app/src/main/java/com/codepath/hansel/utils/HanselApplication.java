@@ -28,7 +28,6 @@ public class HanselApplication extends Application {
         ParseObject.registerSubclass(User.class);
 
         Parse.initialize(this, YOUR_APPLICATION_ID, YOUR_CLIENT_KEY);
-
         // stubParseData();
     }
 

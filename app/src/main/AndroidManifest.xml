@@ -53,6 +53,17 @@
             android:enabled="true" >
         </service>
 
+        <receiver
+            android:name=".receivers.FetchPebblesReceiver"
+            android:process=":remote" >
+        </receiver>
+
+        <service
+            android:name=".services.FetchPebblesService"
+            android:exported="false"
+            android:enabled="true" >
+        </service>
+
         <activity
             android:name=".activities.MainActivity"
             android:label="@string/app_name">
