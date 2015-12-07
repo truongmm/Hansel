@@ -14,7 +14,7 @@ Inspired by the story of <a href="https://en.wikipedia.org/wiki/Hansel_and_Grete
 * [x] User should be able to see and traverse through member's recent paths on a map
 * [x] User should be able to enable/disable location tracking (i.e. pebble dropping)
 * [x] User should be able to configure frequency of pebble dropping
-* [ ] User should be able to see the status of location upload (e.g. pending, sent)
+* [x] User should be able to see the status of location upload (e.g. pending, sent)
 
 ## Demo Features
 * [x] User should be able to switch between users
@@ -28,5 +28,4 @@ Inspired by the story of <a href="https://en.wikipedia.org/wiki/Hansel_and_Grete
 ![cam00889](https://cloud.githubusercontent.com/assets/1873465/11288506/7be098ac-8ed9-11e5-9ad6-207c267e8510.jpg)
 
 ## Video Walkthrough
-* GIF too large:
-https://lh4.googleusercontent.com/-u6AFlZ7KCCU/Vl1buuUon6I/AAAAAAAAANo/SZUuImLdnJw/w405-h692-no/hansel.gif
+![hansel](https://cloud.githubusercontent.com/assets/5839078/11626364/0844fae8-9c97-11e5-9c23-8d27ee1a04d7.gif)
