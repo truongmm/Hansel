@@ -30,25 +30,26 @@ public class SendPebblesService extends Service {
         dbHelper = DatabaseHelper.getInstance(getApplicationContext());
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         currentUser = dbHelper.getUser(sharedPreferences.getInt("user_id", 1));
-        List<Pebble> dbPebbles = dbHelper.getAllPendingPebblesForUsers(new User[]{currentUser}, false, true);
+        List<Pebble> dbPebbles = dbHelper.getAllPendingPebblesForUsers(currentUser);
         if (dbPebbles.size() > 0) {
             for (Pebble pebble: dbPebbles)
             {
                 // Mark pebble as sent
                 dbHelper.updatePebbleStatus(pebble);
 
-                List<Pebble> newDbPebbles = dbHelper.getAllPendingPebblesForUsers(new User[]{currentUser}, false, true);
+                List<Pebble> newDbPebbles = dbHelper.getAllPendingPebblesForUsers(currentUser);
+                List<Pebble> allPebbles = dbHelper.getAllPebbles();
 
                 // Set pointer to parse user and send to parse
                 User user = pebble.getUser();
-                ParseObject parseUser = ParseObject.createWithoutData("User", user.getParseId());
-                pebble.put("user", parseUser);
-                try {
-                    pebble.save();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                pebble.setUser(user);
+//                ParseObject parseUser = ParseObject.createWithoutData("User", user.getParseId());
+//                pebble.put("user", parseUser);
+//                try {
+//                    pebble.save();
+//                } catch (ParseException e) {
+//                    e.printStackTrace();
+//                }
+//                pebble.setUser(user);
             }
             dbPebbles = dbHelper.getAllPebbles();
             Toast.makeText(getApplicationContext(), "DB pebbles added", Toast.LENGTH_LONG).show();

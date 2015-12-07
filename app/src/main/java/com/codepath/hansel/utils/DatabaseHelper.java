@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     // Database Info
@@ -237,13 +238,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.beginTransaction();
         try {
             ContentValues values = new ContentValues();
-            values.put(KEY_PEBBLE_ID, pebble.getId());
-            values.put(KEY_PEBBLE_USER_ID_FK, pebble.getUser().getId());
-            values.put(KEY_PEBBLE_LATITUDE, pebble.getLatitude());
-            values.put(KEY_PEBBLE_LONGITUDE, pebble.getLongitude());
-            values.put(KEY_PEBBLE_TIMESTAMP, pebble.getTimestamp());
-            values.put(KEY_PEBBLE_CREATED_AT, pebble.getTimestamp());
-            values.put(KEY_PEBBLE_UPDATED_AT, pebble.getTimestamp());
             values.put(KEY_PEBBLE_STATUS, "sent");
 
             int rows = db.update(TABLE_PEBBLES, values, KEY_PEBBLE_ID + "= ?", new String[]{String.valueOf(pebble.getId())});
@@ -273,8 +267,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return getPebbles(null, null, null, desc, onlyPending);
     }
 
-    public ArrayList<Pebble> getAllPendingPebblesForUsers(User[] whiteList, boolean desc, boolean onlyPending) {
-        return getPebbles(whiteList, null, null, desc, onlyPending);
+    public List<Pebble> getAllPendingPebblesForUsers(User currentUser) {
+        String query = "SELECT * FROM " + TABLE_PEBBLES + " WHERE " + " status='pending' AND userId=" + currentUser.getId();
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        Cursor cursor = db.rawQuery(query, null);
+        List<Pebble> pebbles = new ArrayList<>();
+        try {
+            if (cursor.moveToFirst()) {
+                Pebble pebble = Pebble.fromDB(cursor);
+                pebbles.add(pebble);
+            }
+        } catch (Exception e) {
+            Log.d(TAG, "Error while trying to get pending pebbles from database");
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+        }
+        return pebbles;
     }
 
     public ArrayList<Pebble> getPebblesForUsers(User[] whiteList, boolean desc, boolean onlyPending) {
