@@ -66,6 +66,10 @@ public class User extends ParseObject {
         return id;
     }
 
+    public String getParseId() {
+        return parseId;
+    }
+
     public String getFirstName() {
         return getString("first_name");
     }

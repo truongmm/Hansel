@@ -6,10 +6,9 @@ import android.content.Intent;
 
 import com.codepath.hansel.services.DropPebbleService;
 
-public class PebbleReceiver extends BroadcastReceiver {
-    public static final int REQUEST_CODE = 12345;
+public class DropPebbleReceiver extends BroadcastReceiver {
+    public static final int REQUEST_CODE = 1;
 
-    // Triggered by the Alarm periodically (starts the service to run task)
     @Override
     public void onReceive(Context context, Intent intent) {
         Intent i = new Intent(context, DropPebbleService.class);

@@ -27,7 +27,8 @@ import com.codepath.hansel.fragments.TimelineFragment;
 import com.codepath.hansel.models.Mapper;
 import com.codepath.hansel.models.Pebble;
 import com.codepath.hansel.models.User;
-import com.codepath.hansel.receivers.PebbleReceiver;
+import com.codepath.hansel.receivers.DropPebbleReceiver;
+import com.codepath.hansel.receivers.SendPebblesReceiver;
 import com.codepath.hansel.utils.DatabaseHelper;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
@@ -82,10 +83,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadPebbles() {
-        dbHelper.clearAllPebbles();
         pebbles = new ArrayList<>();
 
-        ParseQuery<Pebble> query = ParseQuery.getQuery(Pebble.class);
+        String latestTimestamp = dbHelper.getLatestPebbleTimestamp();
+        ParseQuery query = new ParseQuery("Pebble");
+        query.whereGreaterThan("timestamp", latestTimestamp);
         try {
             List<Pebble> parsePebbles = query.find();
             for (Pebble parsePebble : parsePebbles)
@@ -99,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
     private void constructMapper() {
         List<User> users = new ArrayList<>();
         for (User user : dbHelper.getAllUsers()) {
-            ArrayList<Pebble> pebbles = dbHelper.getPebblesForUsers(new User[]{user}, false);
+            ArrayList<Pebble> pebbles = dbHelper.getPebblesForUsers(new User[]{user}, false, false);
             if (!pebbles.isEmpty()) {
                 user.setPebbles(pebbles);
                 users.add(user);
@@ -210,29 +212,53 @@ public class MainActivity extends AppCompatActivity {
     private void restoreSharedPreferences() {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 
-        if (sharedPreferences.getBoolean("enable_tracking", false))
+        if (sharedPreferences.getBoolean("enable_tracking", false)) {
             schedulePebbleDrops();
-        else
+            schedulePebblesSending();
+        }
+        else {
             stopPebbleDrops();
+            stopPebblesSending();
+        }
     }
 
     public void schedulePebbleDrops() {
-        Intent intent = new Intent(MainActivity.this, PebbleReceiver.class);
-        final PendingIntent pebbleDropIntent = PendingIntent.getBroadcast(MainActivity.this, PebbleReceiver.REQUEST_CODE,
+        Intent intent = new Intent(MainActivity.this, DropPebbleReceiver.class);
+        final PendingIntent pebbleDropIntent = PendingIntent.getBroadcast(MainActivity.this, DropPebbleReceiver.REQUEST_CODE,
                 intent, PendingIntent.FLAG_UPDATE_CURRENT);
         long firstMillis = System.currentTimeMillis(); // alarm is set right away
         AlarmManager pebbleDropAlarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         int pebbleDropInterval = 1000 * sharedPreferences.getInt("pebble_drop_interval", 15);
-        Toast.makeText(MainActivity.this, "Pebble service interval is " + (pebbleDropInterval / 1000) + " secs", Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainActivity.this, "Drop pebble service interval is " + (pebbleDropInterval / 1000) + " secs", Toast.LENGTH_SHORT).show();
         pebbleDropAlarm.setRepeating(AlarmManager.RTC_WAKEUP, firstMillis, pebbleDropInterval, pebbleDropIntent);
     }
 
     public void stopPebbleDrops() {
-        Intent intent = new Intent(MainActivity.this, PebbleReceiver.class);
-        final PendingIntent pebbleDropIntent = PendingIntent.getBroadcast(MainActivity.this, PebbleReceiver.REQUEST_CODE,
+        Intent intent = new Intent(MainActivity.this, DropPebbleReceiver.class);
+        final PendingIntent pebbleDropIntent = PendingIntent.getBroadcast(MainActivity.this, DropPebbleReceiver.REQUEST_CODE,
                 intent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager pebbleDropAlarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Toast.makeText(MainActivity.this, "Pebble service stopped", Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainActivity.this, "Drop pebble service stopped", Toast.LENGTH_SHORT).show();
         pebbleDropAlarm.cancel(pebbleDropIntent);
+    }
+
+    public void schedulePebblesSending() {
+        Intent intent = new Intent(MainActivity.this, SendPebblesReceiver.class);
+        final PendingIntent pebbleDropIntent = PendingIntent.getBroadcast(MainActivity.this, SendPebblesReceiver.REQUEST_CODE,
+                intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        long firstMillis = System.currentTimeMillis(); // alarm is set right away
+        AlarmManager sendPebblesAlarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        int sendPebblesInterval = 1000 * sharedPreferences.getInt("send_pebbles_interval", 15);
+        Toast.makeText(MainActivity.this, "Send pebbles service interval is " + (sendPebblesInterval / 1000) + " secs", Toast.LENGTH_SHORT).show();
+        sendPebblesAlarm.setRepeating(AlarmManager.RTC_WAKEUP, firstMillis, sendPebblesInterval, pebbleDropIntent);
+    }
+
+    public void stopPebblesSending() {
+        Intent intent = new Intent(MainActivity.this, SendPebblesReceiver.class);
+        final PendingIntent pebbleDropIntent = PendingIntent.getBroadcast(MainActivity.this, SendPebblesReceiver.REQUEST_CODE,
+                intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        AlarmManager sendPebblesAlarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Toast.makeText(MainActivity.this, "Send pebbles service stopped", Toast.LENGTH_SHORT).show();
+        sendPebblesAlarm.cancel(pebbleDropIntent);
     }
 }

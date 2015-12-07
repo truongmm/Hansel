@@ -16,7 +16,7 @@ import java.util.Date;
 @ParseClassName("Pebble")
 public class Pebble extends ParseObject {
     final DecimalFormat decimalFormat = new DecimalFormat("#.###");
-    private long id;
+    private int id;
     private User user;
     private Date date;
     private double latitude;
@@ -45,7 +45,7 @@ public class Pebble extends ParseObject {
         Pebble pebble = new Pebble();
 
         try {
-            pebble.id = cursor.getLong(cursor.getColumnIndex(DatabaseHelper.KEY_PEBBLE_ID));
+            pebble.id = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.KEY_PEBBLE_ID_RENAME));
             pebble.setTimestamp(cursor.getString(cursor.getColumnIndex(DatabaseHelper.KEY_PEBBLE_TIMESTAMP)));
             pebble.date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(cursor.getString(cursor.getColumnIndex(DatabaseHelper.KEY_PEBBLE_TIMESTAMP)));
             pebble.setLatitude(cursor.getDouble(cursor.getColumnIndex(DatabaseHelper.KEY_PEBBLE_LATITUDE)));
@@ -70,7 +70,7 @@ public class Pebble extends ParseObject {
 //        this.updatedAt = updatedAt;
 //    }
 
-    public long getId(){
+    public int getId(){
         return id;
     }
 

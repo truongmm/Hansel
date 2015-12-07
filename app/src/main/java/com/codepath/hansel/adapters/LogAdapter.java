@@ -64,6 +64,8 @@ public class LogAdapter extends ArrayAdapter<Pebble> {
             if (currentUserId == pebble.getUser().getId())
                 viewHolder.tvStatus.setText(pebble.getStatus() + "...");
         }
+        else
+            viewHolder.tvStatus.setText("");
 
         return convertView;
     }

@@ -166,7 +166,7 @@ public class MapFragment extends Fragment implements
     private void fetchData() {
         List<User> users = new ArrayList<>();
         for (User user : dbHelper.getAllUsers()) {
-            ArrayList<Pebble> pebbles = dbHelper.getPebblesForUsersBeforeDate(new User[]{user}, seekDate, false);
+            ArrayList<Pebble> pebbles = dbHelper.getPebblesForUsersBeforeDate(new User[]{user}, seekDate, false, false);
             if (!pebbles.isEmpty()) {
                 user.setPebbles(pebbles);
                 users.add(user);
