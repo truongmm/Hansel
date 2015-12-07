@@ -38,6 +38,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Pebbles Table Columns
     public static final String KEY_PEBBLE_ID = "id";
+    public static final String KEY_PEBBLE_ID_RENAME = "pebbleId";
     public static final String KEY_PEBBLE_USER_ID_FK = "userId";
     public static final String KEY_PEBBLE_TIMESTAMP = "timestamp";
     public static final String KEY_PEBBLE_LATITUDE = "latitude";
@@ -121,8 +122,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 // Fetch user from SQL DB with parse id
                 User user = getUser(pebble.getUser().getObjectId());
                 values.put(KEY_PEBBLE_USER_ID_FK, user.getId());
-            }
-            else
+            } else
                 values.put(KEY_PEBBLE_USER_ID_FK, pebble.getUser().getId());
 
             values.put(KEY_PEBBLE_LATITUDE, pebble.getLatitude());
@@ -131,7 +131,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(KEY_PEBBLE_CREATED_AT, pebble.getTimestamp());
             values.put(KEY_PEBBLE_UPDATED_AT, pebble.getTimestamp());
             if (pebble.getStatus() != null)
-               values.put(KEY_PEBBLE_STATUS, pebble.getStatus());
+                values.put(KEY_PEBBLE_STATUS, pebble.getStatus());
 
             pebbleId = db.insertOrThrow(TABLE_PEBBLES, null, values);
             db.setTransactionSuccessful();
@@ -244,7 +244,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if (rows == 1)
                 pebbleId = pebble.getId();
 
-            String query = "SELECT * FROM " + TABLE_PEBBLES + " WHERE id=" + pebble.getId();
+            String query = "SELECT *, " +
+                    TABLE_PEBBLES + "." + KEY_PEBBLE_ID + " AS " + KEY_PEBBLE_ID_RENAME +
+                    " FROM " + TABLE_PEBBLES + " WHERE id=" + pebble.getId();
             Cursor cursor = db.rawQuery(query, null);
             cursor.moveToFirst();
             Pebble updatedPebble = Pebble.fromDB(cursor);
@@ -259,7 +261,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return pebbleId;
     }
 
-    public ArrayList<Pebble> getAllPebbles(){
+    public ArrayList<Pebble> getAllPebbles() {
         return getPebbles(null, null, null, false, false);
     }
 
@@ -268,7 +270,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public List<Pebble> getAllPendingPebblesForUsers(User currentUser) {
-        String query = "SELECT * FROM " + TABLE_PEBBLES + " WHERE " + " status='pending' AND userId=" + currentUser.getId();
+        String query = "SELECT *, " +
+                TABLE_PEBBLES + "." + KEY_PEBBLE_ID + " AS " + KEY_PEBBLE_ID_RENAME +
+                " FROM " + TABLE_PEBBLES + " WHERE " + " status='pending' AND userId=" + currentUser.getId();
         SQLiteDatabase db = getWritableDatabase();
         db.beginTransaction();
         Cursor cursor = db.rawQuery(query, null);
@@ -292,7 +296,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return getPebbles(whiteList, null, null, desc, onlyPending);
     }
 
-    public ArrayList<Pebble> getPebblesForUsersBeforeDate(User[] whiteList, Date date, boolean desc, boolean onlyPending){
+    public ArrayList<Pebble> getPebblesForUsersBeforeDate(User[] whiteList, Date date, boolean desc, boolean onlyPending) {
         return getPebbles(whiteList, null, date, desc, onlyPending);
     }
 
@@ -302,7 +306,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public ArrayList<Pebble> getPebbles(User[] whiteList, User[] blackList, Date date, boolean desc, boolean onlyPending) {
         ArrayList<Pebble> pebbles = new ArrayList<>();
-        String query = "SELECT * FROM %s LEFT OUTER JOIN %s ON %s.%s = %s.%s WHERE 1 = 1";
+
+        String query = "SELECT *, " +
+                TABLE_PEBBLES + "." + KEY_PEBBLE_ID + " AS " + KEY_PEBBLE_ID_RENAME +
+                " FROM %s LEFT OUTER JOIN %s ON %s.%s = %s.%s WHERE 1 = 1";
         ArrayList<Object> params = new ArrayList<>();
         params.addAll(Arrays.asList(TABLE_PEBBLES, TABLE_USERS, TABLE_PEBBLES, KEY_PEBBLE_USER_ID_FK, TABLE_USERS, KEY_USER_ID));
 
@@ -316,7 +323,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             params.addAll(Arrays.asList(TABLE_USERS, KEY_USER_ID, TextUtils.join(",", blackList)));
         }
 
-        if(date != null){
+        if (date != null) {
             query += " AND %s.%s <= '%s'";
             params.addAll(Arrays.asList(TABLE_PEBBLES, KEY_PEBBLE_TIMESTAMP, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date)));
         }
@@ -402,7 +409,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (isPebblesTableEmpty)
             return "";
 
-        String query = "SELECT * FROM " + TABLE_PEBBLES + " ORDER BY timestamp DESC";
+        String query = "SELECT *, " +
+                TABLE_PEBBLES + "." + KEY_PEBBLE_ID + " AS " + KEY_PEBBLE_ID_RENAME +
+                " FROM " + TABLE_PEBBLES + " ORDER BY timestamp DESC";
         SQLiteDatabase db = getWritableDatabase();
         db.beginTransaction();
         Cursor cursor = db.rawQuery(query, null);

@@ -45,7 +45,7 @@ public class Pebble extends ParseObject {
         Pebble pebble = new Pebble();
 
         try {
-            pebble.id = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.KEY_PEBBLE_ID));
+            pebble.id = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.KEY_PEBBLE_ID_RENAME));
             pebble.setTimestamp(cursor.getString(cursor.getColumnIndex(DatabaseHelper.KEY_PEBBLE_TIMESTAMP)));
             pebble.date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(cursor.getString(cursor.getColumnIndex(DatabaseHelper.KEY_PEBBLE_TIMESTAMP)));
             pebble.setLatitude(cursor.getDouble(cursor.getColumnIndex(DatabaseHelper.KEY_PEBBLE_LATITUDE)));

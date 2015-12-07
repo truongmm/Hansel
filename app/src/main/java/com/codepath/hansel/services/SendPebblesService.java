@@ -12,8 +12,6 @@ import android.widget.Toast;
 import com.codepath.hansel.models.Pebble;
 import com.codepath.hansel.models.User;
 import com.codepath.hansel.utils.DatabaseHelper;
-import com.parse.ParseException;
-import com.parse.ParseObject;
 
 import java.util.List;
 
@@ -30,7 +28,8 @@ public class SendPebblesService extends Service {
         dbHelper = DatabaseHelper.getInstance(getApplicationContext());
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         currentUser = dbHelper.getUser(sharedPreferences.getInt("user_id", 1));
-        List<Pebble> dbPebbles = dbHelper.getAllPendingPebblesForUsers(currentUser);
+        List<Pebble> dbPebbles = dbHelper.getPebblesForUsers(new User[]{currentUser}, false, true);
+
         if (dbPebbles.size() > 0) {
             for (Pebble pebble: dbPebbles)
             {
@@ -51,6 +50,7 @@ public class SendPebblesService extends Service {
 //                }
 //                pebble.setUser(user);
             }
+            List<Pebble> test = dbHelper.getPebblesForUsers(new User[]{currentUser}, false, true);
             dbPebbles = dbHelper.getAllPebbles();
             Toast.makeText(getApplicationContext(), "DB pebbles added", Toast.LENGTH_LONG).show();
         }
