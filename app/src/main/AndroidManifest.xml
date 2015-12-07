@@ -32,12 +32,23 @@
         android:theme="@style/AppTheme" >
 
         <receiver
-            android:name=".receivers.PebbleReceiver"
+            android:name=".receivers.DropPebbleReceiver"
             android:process=":remote" >
         </receiver>
 
         <service
             android:name=".services.DropPebbleService"
+            android:exported="false"
+            android:enabled="true" >
+        </service>
+
+        <receiver
+            android:name=".receivers.SendPebblesReceiver"
+            android:process=":remote" >
+        </receiver>
+
+        <service
+            android:name=".services.SendPebblesService"
             android:exported="false"
             android:enabled="true" >
         </service>

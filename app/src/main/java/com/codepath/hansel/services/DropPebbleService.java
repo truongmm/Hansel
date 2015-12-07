@@ -26,8 +26,8 @@ public class DropPebbleService extends Service implements LocationListener {
 
     private DatabaseHelper dbHelper;
     private LocationManager locationManager;
-    private User currentUser;
     private Location currentLocation;
+    private User currentUser;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
@@ -42,7 +42,7 @@ public class DropPebbleService extends Service implements LocationListener {
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 4000, 0, this);
 
         if (currentLocation != null) {
-            ArrayList<Pebble> pebbles = dbHelper.getPebblesForUsers(new User[]{currentUser}, false);
+            ArrayList<Pebble> pebbles = dbHelper.getPebblesForUsers(new User[]{currentUser}, false, false);
             if (!pebbles.isEmpty()) {
                 currentUser.setPebbles(pebbles);
             }

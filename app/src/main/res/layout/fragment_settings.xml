@@ -61,12 +61,32 @@
         android:layout_marginTop="15dp"
         android:layout_toRightOf="@+id/tvPebbleDropIntervalLabel" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/send_pebbles_interval"
+        android:id="@+id/tvSendPebblesIntervalLabel"
+        android:layout_below="@+id/spnrPebbleDropInterval"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="30dp"
+        android:layout_marginRight="15dp"
+        android:textColor="@android:color/black" />
+
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/spnrSendPebblesInterval"
+        android:layout_below="@+id/spnrPebbleDropInterval"
+        android:layout_marginTop="15dp"
+        android:layout_toRightOf="@+id/tvSendPebblesIntervalLabel" />
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/save"
         android:id="@+id/btnSave"
-        android:layout_below="@+id/spnrPebbleDropInterval"
+        android:layout_below="@+id/spnrSendPebblesInterval"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 </RelativeLayout>
