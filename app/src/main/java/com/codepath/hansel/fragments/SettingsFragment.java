@@ -182,7 +182,6 @@ public class SettingsFragment extends DialogFragment {
         else {
             mainActivity.stopPebbleDrops();
             mainActivity.stopPebblesSending();
-            mainActivity.stopPebblesFetching();
         }
     }
 }
