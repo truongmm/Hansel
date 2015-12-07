@@ -233,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
                 intent, PendingIntent.FLAG_UPDATE_CURRENT);
         long firstMillis = System.currentTimeMillis(); // alarm is set right away
         AlarmManager pebbleDropAlarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        int pebbleDropInterval = 1000 * sharedPreferences.getInt("pebble_drop_interval", 15);
+        int pebbleDropInterval = 1000 * sharedPreferences.getInt("pebble_drop_interval", 5);
         Toast.makeText(MainActivity.this, "Drop pebble service interval is " + (pebbleDropInterval / 1000) + " secs", Toast.LENGTH_SHORT).show();
         pebbleDropAlarm.setRepeating(AlarmManager.RTC_WAKEUP, firstMillis, pebbleDropInterval, pebbleDropIntent);
     }
@@ -253,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
                 intent, PendingIntent.FLAG_UPDATE_CURRENT);
         long firstMillis = System.currentTimeMillis(); // alarm is set right away
         AlarmManager sendPebblesAlarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        int sendPebblesInterval = 1000 * sharedPreferences.getInt("send_pebbles_interval", 15);
+        int sendPebblesInterval = 1000 * sharedPreferences.getInt("send_pebbles_interval", 5);
         Toast.makeText(MainActivity.this, "Send pebbles service interval is " + (sendPebblesInterval / 1000) + " secs", Toast.LENGTH_SHORT).show();
         sendPebblesAlarm.setRepeating(AlarmManager.RTC_WAKEUP, firstMillis, sendPebblesInterval, pebbleDropIntent);
     }
@@ -273,7 +273,7 @@ public class MainActivity extends AppCompatActivity {
                 intent, PendingIntent.FLAG_UPDATE_CURRENT);
         long firstMillis = System.currentTimeMillis(); // alarm is set right away
         AlarmManager fetchPebblesAlarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        int fetchPebblesInterval = 1000 * sharedPreferences.getInt("fetch_pebbles_interval", 15);
+        int fetchPebblesInterval = 1000 * sharedPreferences.getInt("fetch_pebbles_interval", 5);
         Toast.makeText(MainActivity.this, "Fetch pebbles service interval is " + (fetchPebblesInterval / 1000) + " secs", Toast.LENGTH_SHORT).show();
         fetchPebblesAlarm.setRepeating(AlarmManager.RTC_WAKEUP, firstMillis, fetchPebblesInterval, pebbleDropIntent);
     }

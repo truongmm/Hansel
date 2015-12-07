@@ -133,7 +133,7 @@ public class SettingsFragment extends DialogFragment {
     }
 
     private int getSavedPebbleServiceInterval(String servicePreferenceName) {
-        int pebbleServiceInterval = sharedPreferences.getInt(servicePreferenceName, 15);
+        int pebbleServiceInterval = sharedPreferences.getInt(servicePreferenceName, 5);
         int dropDownPosition = 0;
         switch (pebbleServiceInterval) {
             case 5:
