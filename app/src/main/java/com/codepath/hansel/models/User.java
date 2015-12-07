@@ -1,6 +1,7 @@
 package com.codepath.hansel.models;
 
 import android.database.Cursor;
+import android.location.Location;
 
 import com.codepath.hansel.utils.DatabaseHelper;
 import com.directions.route.Route;
@@ -17,6 +18,7 @@ import static java.lang.Math.sqrt;
 @ParseClassName("User")
 public class User extends ParseObject {
     final private int MAX_SAMPLE_POINTS = 3;
+    final private double MINIMUM_DISTANCE_TO_NEW_POINT = 0.0005;
 
     private int id;
     private String parseId;
@@ -161,5 +163,12 @@ public class User extends ParseObject {
 
     public void setHue(float hue) {
         this.hue = hue;
+    }
+
+    public boolean isValidNewLocation(Location newLocation) {
+        if(pebbles.isEmpty()) return true;
+        LatLng newPoint = new LatLng(newLocation.getLatitude(), newLocation.getLongitude());
+        LatLng lastPoint = pebbles.get(pebbles.size() - 1).getLatLng();
+        return getPointScore(lastPoint,newPoint) > MINIMUM_DISTANCE_TO_NEW_POINT;
     }
 }

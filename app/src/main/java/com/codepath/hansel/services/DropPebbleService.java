@@ -19,6 +19,7 @@ import com.codepath.hansel.models.User;
 import com.codepath.hansel.utils.DatabaseHelper;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class DropPebbleService extends Service implements LocationListener {
@@ -37,16 +38,23 @@ public class DropPebbleService extends Service implements LocationListener {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         currentUser = dbHelper.getUser(sharedPreferences.getInt("user_id", 1));
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 4000, 0, this);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 4000, 0, this);
 
         if (currentLocation != null) {
-            String currentTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-            Pebble pebble = new Pebble(currentUser, currentLocation.getLatitude(), currentLocation.getLongitude(), currentTime, "pending");
-            pebble.setUser(currentUser);
-            dbHelper.addPebble(pebble, false);
-            showToast("Pebble dropped: " + pebble.getCoordinate());
+            ArrayList<Pebble> pebbles = dbHelper.getPebblesForUsers(new User[]{currentUser}, false);
+            if (!pebbles.isEmpty()) {
+                currentUser.setPebbles(pebbles);
+            }
+            if(currentUser.isValidNewLocation(currentLocation)){
+                String currentTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+                Pebble pebble = new Pebble(currentUser, currentLocation.getLatitude(), currentLocation.getLongitude(), currentTime, "pending");
+                pebble.setUser(currentUser);
+                dbHelper.addPebble(pebble, false);
+                showToast("Pebble dropped: " + pebble.getCoordinate());
+            }else{
+                showToast("Pebble too close to last location.");
+            }
         }
         return super.onStartCommand(intent, flags, startId);
     }
