@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -41,6 +42,7 @@ public class SettingsFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         dbHelper = DatabaseHelper.getInstance(getActivity());
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
     }
@@ -51,6 +53,12 @@ public class SettingsFragment extends DialogFragment {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
         setupViews(view);
         return view;
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        menu.findItem(R.id.refresh).setVisible(false);
+        super.onPrepareOptionsMenu(menu);
     }
 
     private void setupViews(View view) {
