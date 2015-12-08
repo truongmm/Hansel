@@ -27,7 +27,7 @@ public class FetchPebblesService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        showToast("Fetch pebbles service started");
+        // showToast("Fetch pebbles service started");
 
         dbHelper = DatabaseHelper.getInstance(getApplicationContext());
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -42,7 +42,7 @@ public class FetchPebblesService extends Service {
             List<Pebble> parsePebbles = query.find();
             for (Pebble parsePebble : parsePebbles)
                 dbHelper.addPebble(parsePebble, true);
-            showToast("Pebbles fetched successfully");
+            // showToast("Pebbles fetched successfully");
         } catch (ParseException e) {
             e.printStackTrace();
         }

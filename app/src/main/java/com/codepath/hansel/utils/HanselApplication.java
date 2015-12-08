@@ -8,6 +8,7 @@ import com.codepath.hansel.models.User;
 import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 
 import java.text.SimpleDateFormat;
@@ -28,10 +29,21 @@ public class HanselApplication extends Application {
         ParseObject.registerSubclass(User.class);
 
         Parse.initialize(this, YOUR_APPLICATION_ID, YOUR_CLIENT_KEY);
-        // stubParseData();
+        stubParseData();
     }
 
     public void stubParseData() {
+        ParseQuery<User> query = ParseQuery.getQuery(User.class);
+        List<User> parseUsers = new ArrayList<>();
+        try {
+            parseUsers = query.find();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        if (parseUsers.size() > 0)
+            return;
+
         User ray = new User("Ray", "Yamada", "https://scontent-lax3-1.xx.fbcdn.net/hprofile-xta1/v/t1.0-1/c2.0.597.597/s160x160/10440731_10102381960663565_7531332407190893695_n.jpg?oh=d1e2105305aed67ce1285dcbe41b5b58&oe=56EADF76");
         User melody = new User("Melody", "Truong", "https://scontent-lax3-1.xx.fbcdn.net/hprofile-xfa1/v/t1.0-1/p160x160/12196191_907745375939172_2342649154846833771_n.jpg?oh=70c8b096a894a43df4fcea52af91f303&oe=56F1B9C0");
         User calvin = new User("Calvin", "Liang", "https://scontent-lax3-1.xx.fbcdn.net/hprofile-xtp1/v/t1.0-1/c2.172.716.716/s160x160/1520727_10202480658391510_5012412434444932969_n.jpg?oh=a6ce9c8146b391ec0557493bbec8d626&oe=56D653AB");
@@ -46,7 +58,7 @@ public class HanselApplication extends Application {
         ParseObject.saveAllInBackground(users, new SaveCallback() {
             @Override
             public void done(ParseException e) {
-                Toast.makeText(getApplicationContext(), "Users added", Toast.LENGTH_LONG).show();
+                // Toast.makeText(getApplicationContext(), "Users added", Toast.LENGTH_LONG).show();
             }
         });
 
@@ -66,13 +78,13 @@ public class HanselApplication extends Application {
         Pebble p12 = new Pebble(calvin, 37.422737, -122.153485, getDate(new Date(System.currentTimeMillis() - 2780 * 1000)), "sent");
         Pebble p13 = new Pebble(calvin, 37.424816, -122.146168, getDate(new Date(System.currentTimeMillis() - 1980 * 1000)), "sent");
         Pebble p14 = new Pebble(calvin, 37.424390, -122.140782, getDate(new Date(System.currentTimeMillis() - 1180 * 1000)), "sent");
-        Pebble p15 = new Pebble(calvin, 37.425140, -122.136426, getDate(new Date(System.currentTimeMillis() - 20 * 1000)), "sent");
+        // Pebble p15 = new Pebble(calvin, 37.425140, -122.136426, getDate(new Date(System.currentTimeMillis() - 20 * 1000)), "sent");
 
         Pebble p16 = new Pebble(ruichuan, 37.444904, -122.162561, getDate(new Date(System.currentTimeMillis() - 3570 * 1000)), "sent");
         Pebble p17 = new Pebble(ruichuan, 37.441752, -122.151725, getDate(new Date(System.currentTimeMillis() - 2770 * 1000)), "sent");
         Pebble p18 = new Pebble(ruichuan, 37.435244, -122.147906, getDate(new Date(System.currentTimeMillis() - 1970 * 1000)), "sent");
         Pebble p19 = new Pebble(ruichuan, 37.429263, -122.142134, getDate(new Date(System.currentTimeMillis() - 1170 * 1000)), "sent");
-        Pebble p20 = new Pebble(ruichuan, 37.425429, -122.136426, getDate(new Date(System.currentTimeMillis() - 30 * 1000)), "sent");
+        // Pebble p20 = new Pebble(ruichuan, 37.425429, -122.136426, getDate(new Date(System.currentTimeMillis() - 30 * 1000)), "sent");
 
         List<Pebble> pebbles = new ArrayList<>();
         pebbles.add(p1);
@@ -89,17 +101,17 @@ public class HanselApplication extends Application {
         pebbles.add(p12);
         pebbles.add(p13);
         pebbles.add(p14);
-        pebbles.add(p15);
+        // pebbles.add(p15);
         pebbles.add(p16);
         pebbles.add(p17);
         pebbles.add(p18);
         pebbles.add(p19);
-        pebbles.add(p20);
+        // pebbles.add(p20);
 
         ParseObject.saveAllInBackground(pebbles, new SaveCallback() {
             @Override
             public void done(ParseException e) {
-                Toast.makeText(getApplicationContext(), "Pebbles added", Toast.LENGTH_LONG).show();
+                // Toast.makeText(getApplicationContext(), "Pebbles added", Toast.LENGTH_LONG).show();
             }
         });
     }

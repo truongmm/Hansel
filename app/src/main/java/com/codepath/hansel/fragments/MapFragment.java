@@ -152,6 +152,8 @@ public class MapFragment extends Fragment implements
         tvMapRelativeTime = (TextView) view.findViewById(R.id.tvMapRelativeTime);
         mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         GoogleMap googleMap = mapFragment.getMap();
+        googleMap.getUiSettings().setZoomControlsEnabled(true);
+        googleMap.setPadding(20, 20, 20, 100);
         googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
             private final View mWindow = getActivity().getLayoutInflater().inflate(R.layout.custom_info_window, null);
             private final View mContents = getActivity().getLayoutInflater().inflate(R.layout.custom_info_contents, null);
@@ -232,7 +234,7 @@ public class MapFragment extends Fragment implements
                 }
             });
         } else {
-            Toast.makeText(getActivity(), "Error - Map Fragment was null!!", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(getActivity(), "Error - Map Fragment was null!!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -286,7 +288,7 @@ public class MapFragment extends Fragment implements
             map.clear();
 
             // Map is ready
-            Toast.makeText(getActivity(), "Map Fragment was loaded properly!", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(getActivity(), "Map Fragment was loaded properly!", Toast.LENGTH_SHORT).show();
             map.setMyLocationEnabled(true);
 
             // Now that map has loaded, let's get our location!
@@ -297,7 +299,7 @@ public class MapFragment extends Fragment implements
 
             connectClient();
         } else {
-            Toast.makeText(getActivity(), "Error - Map was null!!", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(getActivity(), "Error - Map was null!!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -385,13 +387,13 @@ public class MapFragment extends Fragment implements
         // Display the connection status
         Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (location != null) {
-            Toast.makeText(getActivity(), "GPS location was found!", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(getActivity(), "GPS location was found!", Toast.LENGTH_SHORT).show();
 //            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
 //            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
 //            map.animateCamera(cameraUpdate);
             startLocationUpdates();
         } else {
-            Toast.makeText(getActivity(), "Current location was null, enable GPS on emulator!", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(getActivity(), "Current location was null, enable GPS on emulator!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -419,9 +421,9 @@ public class MapFragment extends Fragment implements
     @Override
     public void onConnectionSuspended(int i) {
         if (i == CAUSE_SERVICE_DISCONNECTED) {
-            Toast.makeText(getActivity(), "Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(getActivity(), "Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
         } else if (i == CAUSE_NETWORK_LOST) {
-            Toast.makeText(getActivity(), "Network lost. Please re-connect.", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(getActivity(), "Network lost. Please re-connect.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -449,15 +451,15 @@ public class MapFragment extends Fragment implements
                 e.printStackTrace();
             }
         } else {
-            Toast.makeText(getActivity().getApplicationContext(),
-                    "Sorry. Location services not available to you", Toast.LENGTH_LONG).show();
+            // Toast.makeText(getActivity().getApplicationContext(),
+            //        "Sorry. Location services not available to you", Toast.LENGTH_LONG).show();
         }
     }
 
     @Override
     public void onRoutingFailure() {
         progressDialog.dismiss();
-        Toast.makeText(getActivity(), "Something went wrong, Try again", Toast.LENGTH_SHORT).show();
+        // Toast.makeText(getActivity(), "Something went wrong, Try again", Toast.LENGTH_SHORT).show();
     }
 
     @Override

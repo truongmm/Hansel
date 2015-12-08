@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
             for (Pebble parsePebble : parsePebbles)
                 dbHelper.addPebble(parsePebble, true);
             pebbles.addAll(dbHelper.getAllPebbles());
-            Toast.makeText(MainActivity.this, "Pebbles fetched", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(MainActivity.this, "Pebbles fetched", Toast.LENGTH_SHORT).show();
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
         long firstMillis = System.currentTimeMillis(); // alarm is set right away
         AlarmManager pebbleDropAlarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         int pebbleDropInterval = 1000 * sharedPreferences.getInt("pebble_drop_interval", 5);
-        Toast.makeText(MainActivity.this, "Drop pebble service interval is " + (pebbleDropInterval / 1000) + " secs", Toast.LENGTH_SHORT).show();
+        // Toast.makeText(MainActivity.this, "Drop pebble service interval is " + (pebbleDropInterval / 1000) + " secs", Toast.LENGTH_SHORT).show();
         pebbleDropAlarm.setRepeating(AlarmManager.RTC_WAKEUP, firstMillis, pebbleDropInterval, pebbleDropIntent);
     }
 
@@ -243,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
         final PendingIntent pebbleDropIntent = PendingIntent.getBroadcast(MainActivity.this, DropPebbleReceiver.REQUEST_CODE,
                 intent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager pebbleDropAlarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Toast.makeText(MainActivity.this, "Drop pebble service stopped", Toast.LENGTH_SHORT).show();
+        // Toast.makeText(MainActivity.this, "Drop pebble service stopped", Toast.LENGTH_SHORT).show();
         pebbleDropAlarm.cancel(pebbleDropIntent);
     }
 
@@ -254,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
         long firstMillis = System.currentTimeMillis(); // alarm is set right away
         AlarmManager sendPebblesAlarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         int sendPebblesInterval = 1000 * sharedPreferences.getInt("send_pebbles_interval", 5);
-        Toast.makeText(MainActivity.this, "Send pebbles service interval is " + (sendPebblesInterval / 1000) + " secs", Toast.LENGTH_SHORT).show();
+        // Toast.makeText(MainActivity.this, "Send pebbles service interval is " + (sendPebblesInterval / 1000) + " secs", Toast.LENGTH_SHORT).show();
         sendPebblesAlarm.setRepeating(AlarmManager.RTC_WAKEUP, firstMillis, sendPebblesInterval, pebbleDropIntent);
     }
 
@@ -263,7 +263,7 @@ public class MainActivity extends AppCompatActivity {
         final PendingIntent pebbleDropIntent = PendingIntent.getBroadcast(MainActivity.this, SendPebblesReceiver.REQUEST_CODE,
                 intent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager sendPebblesAlarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Toast.makeText(MainActivity.this, "Send pebbles service stopped", Toast.LENGTH_SHORT).show();
+        // Toast.makeText(MainActivity.this, "Send pebbles service stopped", Toast.LENGTH_SHORT).show();
         sendPebblesAlarm.cancel(pebbleDropIntent);
     }
 
@@ -274,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
         long firstMillis = System.currentTimeMillis(); // alarm is set right away
         AlarmManager fetchPebblesAlarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         int fetchPebblesInterval = 1000 * sharedPreferences.getInt("fetch_pebbles_interval", 5);
-        Toast.makeText(MainActivity.this, "Fetch pebbles service interval is " + (fetchPebblesInterval / 1000) + " secs", Toast.LENGTH_SHORT).show();
+        // Toast.makeText(MainActivity.this, "Fetch pebbles service interval is " + (fetchPebblesInterval / 1000) + " secs", Toast.LENGTH_SHORT).show();
         fetchPebblesAlarm.setRepeating(AlarmManager.RTC_WAKEUP, firstMillis, fetchPebblesInterval, pebbleDropIntent);
     }
 
@@ -283,7 +283,7 @@ public class MainActivity extends AppCompatActivity {
         final PendingIntent pebbleDropIntent = PendingIntent.getBroadcast(MainActivity.this, FetchPebblesReceiver.REQUEST_CODE,
                 intent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager fetchPebblesAlarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Toast.makeText(MainActivity.this, "Fetch pebbles service stopped", Toast.LENGTH_SHORT).show();
+        // Toast.makeText(MainActivity.this, "Fetch pebbles service stopped", Toast.LENGTH_SHORT).show();
         fetchPebblesAlarm.cancel(pebbleDropIntent);
     }
 }

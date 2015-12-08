@@ -32,7 +32,7 @@ public class DropPebbleService extends Service implements LocationListener {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        showToast("Pebble drop service started");
+        // showToast("Pebble drop service started");
 
         dbHelper = DatabaseHelper.getInstance(getApplicationContext());
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -53,7 +53,7 @@ public class DropPebbleService extends Service implements LocationListener {
                 dbHelper.addPebble(pebble, false);
                 showToast("Pebble dropped: " + pebble.getCoordinate());
             }else{
-                showToast("Pebble too close to last location.");
+                // showToast("Pebble can not be dropped. Too close to last location.");
             }
         }
         return super.onStartCommand(intent, flags, startId);

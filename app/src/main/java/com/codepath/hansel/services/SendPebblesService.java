@@ -25,7 +25,7 @@ public class SendPebblesService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        showToast("Send pebbles service started");
+        // showToast("Send pebbles service started");
 
         dbHelper = DatabaseHelper.getInstance(getApplicationContext());
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -50,7 +50,7 @@ public class SendPebblesService extends Service {
                 pebble.setUser(user);
             }
 
-            Toast.makeText(getApplicationContext(), "DB pebbles added", Toast.LENGTH_LONG).show();
+            // Toast.makeText(getApplicationContext(), "DB pebbles added", Toast.LENGTH_LONG).show();
         }
 
         return super.onStartCommand(intent, flags, startId);
